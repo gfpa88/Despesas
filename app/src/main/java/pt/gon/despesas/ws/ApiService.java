@@ -29,4 +29,6 @@ public interface ApiService {
     @POST("https://script.google.com/macros/s/AKfycbwdV9vxmRzIwjUtcTPWxqrSc89UZsKW7NBPW4onCg/exec")
     Observable<Response<ResponseBody>> manageMovimento(@Field("id") String id, @Field("sheet") String sheet, @Field("operation") String operation, @Field("date") String date, @Field("description") String description, @Field("value") String value, @Field("category") String category, @Field("person") String person, @Field("rowIndex") String rowIndex);
 
+    @GET("https://raw.githubusercontent.com/gfpa88/Despesas/master/apk/version.txt")
+    Observable<Response<ResponseBody>>  getAppVersion();
 }

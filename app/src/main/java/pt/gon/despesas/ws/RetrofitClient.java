@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.Date;
 
 import io.reactivex.Observer;
@@ -146,6 +147,41 @@ public class RetrofitClient {
                     @Override
                     public void onNext(Response<ResponseBody> responseBodyResponse) {
                         callback.onSuccess(responseBodyResponse.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        callback.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+    @SuppressLint("CheckResult")
+    public void getVersion(final ApiCallBack callback) {
+        client2.create(ApiService.class).getAppVersion()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new Observer<Response<ResponseBody>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response<ResponseBody> responseBodyResponse) {
+                        String resp = null ;
+                        try {
+                            resp = responseBodyResponse.body().string();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        callback.onSuccess(resp);
                     }
 
                     @Override
