@@ -5,6 +5,7 @@ import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -153,11 +154,13 @@ public class MainActivity extends AppCompatActivity {
                         builder.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                DownloadManager d = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
+                              //  DownloadManager d = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
                                 String url = ("https://github.com/gfpa88/Despesas/raw/master/apk/despesas_"+newVersion+".apk");
-                                DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
-                                req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                                d.enqueue(req);
+                              //  DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
+                               // req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                               // d.enqueue(req);
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(browserIntent);
                             }
                         });
                         builder.setNegativeButton("Não", new DialogInterface.OnClickListener() {
