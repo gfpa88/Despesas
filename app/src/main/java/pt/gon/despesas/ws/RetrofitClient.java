@@ -4,11 +4,18 @@ import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.util.Date;
+
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
+import pt.gon.despesas.adapter.Preferences;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -62,11 +69,95 @@ public class RetrofitClient {
     }
 
     @SuppressLint("CheckResult")
-    public  void deleteMovimento(String id, int index, final ApiCallBack callback) {
-        client.create(ApiService.class).getMovimentos(id,"Movimentos")
+    public  void getCategorias(String id, final ApiCallBack callback) {
+        client.create(ApiService.class).getCategorias(id,"Categorias")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(callObserver(callback));
+    }
+
+    @SuppressLint("CheckResult")
+    public  void deleteMovimento(String id, int index, final ApiCallBack callback) {
+        client2.create(ApiService.class).manageMovimento(id,"Movimentos","delete","","","","","",(index+2)+"")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new Observer<Response<ResponseBody>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response<ResponseBody> responseBodyResponse) {
+                        callback.onSuccess(responseBodyResponse.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        callback.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @SuppressLint("CheckResult")
+    public  void inserirMovimento(String id, String descricao, String valor, String categoria, String pessoa, final ApiCallBack callback) {
+        client2.create(ApiService.class).manageMovimento(id,"Movimentos","insert",Preferences.convertFromDate(new Date()),descricao,valor,categoria,pessoa,"")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new Observer<Response<ResponseBody>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response<ResponseBody> responseBodyResponse) {
+                        callback.onSuccess(responseBodyResponse.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        callback.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @SuppressLint("CheckResult")
+    public  void insertMovimento(String id, int index, final ApiCallBack callback) {
+        client2.create(ApiService.class).manageMovimento(id,"Movimentos","delete","","","","","",(index+2)+"")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new Observer<Response<ResponseBody>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Response<ResponseBody> responseBodyResponse) {
+                        callback.onSuccess(responseBodyResponse.toString());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        callback.onError(e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     @NonNull

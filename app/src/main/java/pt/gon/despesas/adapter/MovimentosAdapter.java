@@ -31,6 +31,33 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
             pessoa = view.findViewById(R.id.pessoa);
             date = view.findViewById(R.id.date);
             descricao = view.findViewById(R.id.descricao);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    AlertDialog dialog;
+                    builder.setTitle("Remover Movimento");
+                    builder.setMessage("Queres eliminar este movimento?");
+                    builder.setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            activity.deleteMovimentoList(getAdapterPosition());
+                        }
+                    });
+                    builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+                    dialog = builder.create();
+                    dialog.show();
+
+
+                }
+            });
         }
     }
 
@@ -48,6 +75,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
         return new MyViewHolder(itemView);
     }
 
+
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Movimento movie = movimentosList.get(position);
@@ -63,7 +91,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
 
     @Override
     public int getItemCount() {
-        return movimentosList.size();
+        return movimentosList != null ? movimentosList.size(): 0;
     }
 
 }

@@ -43,10 +43,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 addSpreadSheet();
-/*                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-                */
             }
         });
 
@@ -76,10 +72,6 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -101,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Dialog dialog2 =Dialog.class.cast(dialog);
+                Dialog dialog2 = Dialog.class.cast(dialog);
                 EditText id = dialog2.findViewById(R.id.input_ss_id);
                 EditText name = dialog2.findViewById(R.id.input_ss_name);
                 Preferences.saveSpreadSheatsList(activity,name.getText().toString(),id.getText().toString());
