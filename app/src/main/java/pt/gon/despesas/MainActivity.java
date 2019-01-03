@@ -53,8 +53,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                downloadNewVersion();
-                //addSpreadSheet();
+                addSpreadSheet();
             }
         });
 
@@ -68,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         loadSpreadSheatsList();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        downloadNewVersion();
     }
 
     @Override
