@@ -43,7 +43,7 @@ public class MovimentosActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movimentos);
         activity = this;
 
-       id = getIntent().getExtras().getString("id");
+        id = getIntent().getExtras().getString("id");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -64,9 +64,12 @@ public class MovimentosActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadMovimentosList();
-
     }
 
     public void loadMovimentosList(){
@@ -114,6 +117,7 @@ public class MovimentosActivity extends AppCompatActivity {
             }
         });
     }
+
 
     public void addMovimento(){
         // 1. Instantiate an AlertDialog.Builder with its constructor

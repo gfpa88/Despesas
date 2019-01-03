@@ -130,9 +130,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void downloadNewVersion(){
-
-
-
         final ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("A Carregar");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
@@ -146,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
                     String version = pInfo.versionName;
-                    String newVersion = value!= null ? (String) value : null;
+                    final String newVersion = value!= null ? (String) value : null;
                     if(newVersion != null && !version.equals(newVersion)){
                         // 1. Instantiate an AlertDialog.Builder with its constructor
                         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -157,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 DownloadManager d = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
-                                String url = ("https://github.com/gfpa88/Despesas/raw/master/apk/despesas.apk");
+                                String url = ("https://github.com/gfpa88/Despesas/raw/master/apk/despesas_"+newVersion+".apk");
                                 DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
                                 req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                                 d.enqueue(req);
