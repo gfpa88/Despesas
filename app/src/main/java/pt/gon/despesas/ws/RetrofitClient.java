@@ -106,8 +106,8 @@ public class RetrofitClient {
     }
 
     @SuppressLint("CheckResult")
-    public  void inserirMovimento(String id, String descricao, String valor, String categoria, String pessoa, final ApiCallBack callback) {
-        client2.create(ApiService.class).manageMovimento(id,"Movimentos","insert",Preferences.convertFromDate(new Date()),descricao,valor,categoria,pessoa,"")
+    public  void inserirMovimento(String id, String descricao, String valor, String categoria, String pessoa, Date date, final ApiCallBack callback) {
+        client2.create(ApiService.class).manageMovimento(id,"Movimentos","insert",Preferences.convertFromDate(date),descricao,valor,categoria,pessoa,"")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new Observer<Response<ResponseBody>>() {

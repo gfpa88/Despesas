@@ -1,11 +1,14 @@
 package pt.gon.despesas;
 
+import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
@@ -14,11 +17,20 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CalendarView;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import pt.gon.despesas.adapter.MovimentosAdapter;
 import pt.gon.despesas.adapter.Preferences;
@@ -35,6 +47,8 @@ public class MovimentosActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MovimentosAdapter mAdapter;
     MovimentosActivity activity;
+
+    static View addViewMovimento;
   //  String id = "1w6E8-hPQJcAOrtiCVJPx1fVp-dOH2aW25twURTCpOzU";
     String id = "";
     @Override
@@ -149,26 +163,58 @@ public class MovimentosActivity extends AppCompatActivity {
                 ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
                 ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
 
-                View view = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
-                final AppCompatSpinner tipo = (AppCompatSpinner) view.findViewById(R.id.input_ss_tipo);
+               final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
+                final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_tipo);
                 tipo.setAdapter(adapterTipos);
 
-                final AppCompatSpinner pessoa = (AppCompatSpinner) view.findViewById(R.id.input_ss_pessoa);
+                final AppCompatSpinner pessoa = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_pessoa);
                 pessoa.setAdapter(adapterPessoas);
 
 
-                final EditText valor = view.findViewById(R.id.input_ss_value);
-                final EditText descricao = view.findViewById(R.id.input_ss_descricao);
+                final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
+                final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
+
+                final TextView date = addViewMovimento.findViewById(R.id.input_ss_date);
+                date.setText(Preferences.convertFromSimpleDate(new Date()));
+
+                final CalendarView simpleCalendarView = addViewMovimento.findViewById(R.id.calendarView); // get the reference of CalendarView
+                simpleCalendarView.setDate((new Date()).getTime());
+                simpleCalendarView.setOnDateChangeListener( new CalendarView.OnDateChangeListener() {
+                    public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+                        Calendar  calendar = new GregorianCalendar( year, month, dayOfMonth );
+                        date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
+                    }
+                });
+
+                final ViewGroup frm = addViewMovimento.findViewById(R.id.frm);
+                date.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        if(frm.getVisibility() == View.GONE)
+                            frm.setVisibility(View.VISIBLE);
+                        else
+                            frm.setVisibility(View.GONE);
+                    }
+                });
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 AlertDialog dialog;
-                builder.setView(view);
+                builder.setView(addViewMovimento);
                 builder.setTitle("Adicionar Movimento");
                 builder.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         progress.show();
-                        RetrofitClient.getInstance().inserirMovimento(id, descricao.getText().toString(),valor.getText().toString(), tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString(),pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString(), new ApiCallBack() {
+                        Calendar now = Calendar.getInstance();
+                        Calendar selected = Calendar.getInstance();
+                        selected.setTime(Preferences.convertToSimpleDate(date.getText().toString()));
+
+                        Date dateToSend = selected.getTime();
+                        if(now.get(Calendar.DAY_OF_MONTH) == selected.get(Calendar.DAY_OF_MONTH) && now.get(Calendar.MONTH) == selected.get(Calendar.MONTH) && now.get(Calendar.YEAR) == selected.get(Calendar.YEAR)){
+                            dateToSend = new Date();
+                        }
+                        RetrofitClient.getInstance().inserirMovimento(id, descricao.getText().toString(),valor.getText().toString().trim().isEmpty() ? "0": valor.getText().toString(), tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString(),pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString(), dateToSend, new ApiCallBack() {
                             @Override
                             public void onSuccess(@NonNull Object value) {
                                 progress.dismiss();
@@ -204,5 +250,4 @@ public class MovimentosActivity extends AppCompatActivity {
         });
 
     }
-
 }
