@@ -14,8 +14,8 @@ android {
         applicationId "pt.gon.despesas"
         minSdkVersion 23
         targetSdkVersion 28
-        versionCode 6
-        versionName "1.6"
+        versionCode 7
+        versionName "1.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.config
     }
@@ -26,6 +26,19 @@ android {
         }
         debug {
             signingConfig signingConfigs.config
+        }
+    }
+    flavorDimensions "mode"
+    productFlavors {
+        dev {
+            dimension "mode"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+        }
+        prod {
+            dimension "mode"
+            applicationIdSuffix ""
+            versionNameSuffix ""
         }
     }
     lintOptions {

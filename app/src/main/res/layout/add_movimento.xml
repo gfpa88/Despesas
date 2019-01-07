@@ -23,7 +23,7 @@
             android:id="@+id/input_ss_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
+            android:inputType="numberDecimal|numberSigned"
             android:hint="Valor" />
 
     </android.support.design.widget.TextInputLayout>

@@ -32,9 +32,10 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
             date = view.findViewById(R.id.date);
             descricao = view.findViewById(R.id.descricao);
 
-            view.setOnClickListener(new View.OnClickListener() {
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+
                 @Override
-                public void onClick(View v) {
+                public boolean onLongClick(View v) {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                     AlertDialog dialog;
                     builder.setTitle("Remover Movimento");
@@ -55,7 +56,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
                     dialog = builder.create();
                     dialog.show();
 
-
+                    return false;
                 }
             });
         }

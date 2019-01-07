@@ -16,6 +16,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,6 +29,7 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -51,6 +54,8 @@ public class MovimentosActivity extends AppCompatActivity {
     static View addViewMovimento;
   //  String id = "1w6E8-hPQJcAOrtiCVJPx1fVp-dOH2aW25twURTCpOzU";
     String id = "";
+    private Menu menu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +88,22 @@ public class MovimentosActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadMovimentosList();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.refreshMovimentos) {
+            loadMovimentosList();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void loadMovimentosList(){
@@ -97,6 +117,7 @@ public class MovimentosActivity extends AppCompatActivity {
             @Override
             public void onSuccess(@NonNull Object value) {
                 movimentoList = ((Movimentos) value).getMovimentos();
+                Collections.reverse(movimentoList);
                 mAdapter = new MovimentosAdapter(activity, movimentoList);
                 recyclerView.setAdapter(mAdapter);
                 mAdapter.notifyDataSetChanged();
@@ -117,6 +138,7 @@ public class MovimentosActivity extends AppCompatActivity {
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
+        index = (movimentoList.size()-1) - index;
         RetrofitClient.getInstance().deleteMovimento(id, index, new ApiCallBack() {
             @Override
             public void onSuccess(@NonNull Object value) {
@@ -131,7 +153,6 @@ public class MovimentosActivity extends AppCompatActivity {
             }
         });
     }
-
 
     public void addMovimento(){
         // 1. Instantiate an AlertDialog.Builder with its constructor
