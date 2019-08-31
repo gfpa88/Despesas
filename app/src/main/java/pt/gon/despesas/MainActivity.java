@@ -144,7 +144,8 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
                     String version = pInfo.versionName;
-                    final String newVersion = value!= null ? (String) value : null;
+                    String v = ((String) value).trim().replace("\n","");
+                    final String newVersion = value!= null ? v : null;
                     if(newVersion != null && !version.equals(newVersion)){
                         // 1. Instantiate an AlertDialog.Builder with its constructor
                         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
