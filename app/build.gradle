@@ -32,8 +32,8 @@ android {
     productFlavors {
         dev {
             dimension "mode"
-            applicationIdSuffix ".dev"
-            versionNameSuffix "-dev"
+            applicationIdSuffix ""
+            versionNameSuffix ""
         }
         prod {
             dimension "mode"
