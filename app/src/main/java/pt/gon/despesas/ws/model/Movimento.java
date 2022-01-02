@@ -13,7 +13,7 @@ public class Movimento {
     private String descricao;
     @SerializedName("Valor")
     @Expose
-    private Double valor;
+    private String valor;
     @SerializedName("Tipo")
     @Expose
     private String tipo;
@@ -22,10 +22,10 @@ public class Movimento {
     private String pessoa;
     @SerializedName("Mes")
     @Expose
-    private Integer mes;
+    private String mes;
     @SerializedName("Ano")
     @Expose
-    private Integer ano;
+    private String ano;
 
     public String getData() {
         return data;
@@ -43,11 +43,11 @@ public class Movimento {
         this.descricao = descricao;
     }
 
-    public Double getValor() {
+    public String getValor() {
         return valor;
     }
 
-    public void setValor(Double valor) {
+    public void setValor(String valor) {
         this.valor = valor;
     }
 
@@ -68,19 +68,19 @@ public class Movimento {
     }
 
 
-    public Integer getAno() {
+    public String getAno() {
         return ano;
     }
 
-    public void setAno(Integer ano) {
+    public void setAno(String ano) {
         this.ano = ano;
     }
 
-    public Integer getMes() {
+    public String getMes() {
         return mes;
     }
 
-    public void setMes(Integer mes) {
+    public void setMes(String mes) {
         this.mes = mes;
     }
 
