@@ -1,6 +1,6 @@
 package pt.gon.despesas.ws;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public interface ApiCallBack {
     void onSuccess(@NonNull Object value);

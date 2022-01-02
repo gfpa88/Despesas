@@ -1,23 +1,21 @@
 package pt.gon.despesas;
 
 import android.app.Dialog;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,12 +24,10 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.List;
 
-import pt.gon.despesas.adapter.MovimentosAdapter;
 import pt.gon.despesas.adapter.Preferences;
 import pt.gon.despesas.adapter.SpreadSheetAdapter;
 import pt.gon.despesas.ws.ApiCallBack;
 import pt.gon.despesas.ws.RetrofitClient;
-import pt.gon.despesas.ws.model.Movimentos;
 
 public class MainActivity extends AppCompatActivity {
 
