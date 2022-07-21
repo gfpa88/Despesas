@@ -9,13 +9,16 @@ android {
             storePassword 'qwerty'
         }
     }
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
     compileSdkVersion 29
     defaultConfig {
         applicationId "pt.gon.despesas"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 10
-        versionName "1.10"
+        versionCode 11
+        versionName "1.11"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         signingConfig signingConfigs.config
     }
@@ -63,4 +66,7 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.4'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
+    implementation 'com.google.android.gms:play-services-auth:20.0.0'
+    implementation 'com.google.api-client:google-api-client-android:1.33.0'
+    implementation 'com.google.apis:google-api-services-sheets:v4-rev20210629-1.32.1'
 }

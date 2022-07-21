@@ -1,5 +1,6 @@
 package pt.gon.despesas;
 
+import android.accounts.Account;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -9,19 +10,39 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.SheetsScopes;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import pt.gon.despesas.adapter.Preferences;
@@ -32,16 +53,23 @@ import pt.gon.despesas.ws.RetrofitClient;
 public class MainActivity extends AppCompatActivity {
 
 
+    private static final int RC_SIGN_IN = 0;
+    private static final String TAG = "MainActivity" ;
     private List<SpreadSheet> spreadSheetList = new ArrayList<>();
     private RecyclerView recyclerView;
     private SpreadSheetAdapter mAdapter;
     MainActivity activity;
+    GoogleSignInClient mGoogleSignInClient;
+    GoogleAccountCredential mGoogleAccountCredential;
 
+    String oauthIdDev = "713935152996-3r52ti5ft0t8m7c1foc6enthiflgm22b.apps.googleusercontent.com";
+
+    String oauthIdProd = "713935152996-benuarkk1c14ivvnv68uvfk98v6c1rli.apps.googleusercontent.com";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        initDependencies();
         activity = this;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -50,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addSpreadSheet();
+               addSpreadSheet();
             }
         });
 
@@ -62,8 +90,84 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
 
+        Account[] accounts = GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential.getAllAccounts();
 
-        loadSpreadSheatsList();
+
+        if(accounts.length== 0){
+            Intent signInIntent = GoogleCrendentialSingleton.getInstance().mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        }else {
+            if(Preferences.loadAccount(activity) == null){
+                chooseAccount(accounts);
+            }else{
+                setAccount();
+                loadSpreadSheatsList();
+            }
+        }
+    }
+
+    private void setAccount() {
+        List<Account> accountsList = Arrays.asList(GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential.getAllAccounts());
+        for (Account a :
+                accountsList) {
+            if(a.name.equals(Preferences.loadAccount(activity))){
+                GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential.setSelectedAccount(a);
+                GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential.setSelectedAccountName(a.name);
+                GoogleCrendentialSingleton.getInstance().account = a;
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+
+
+            Account[] accounts = mGoogleAccountCredential.getAllAccounts();
+            chooseAccount(accounts);
+            // Create the sheets API client
+        }
+    }
+
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            Log.i(TAG, "sign in"+ account.toString());
+            // Signed in successfully, show authenticated UI.
+         //   updateUI(account);
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.e(TAG,"handleSignInResult" ,e);
+            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+            e.printStackTrace();
+          //  updateUI(null);
+        }
+    }
+
+
+    void initDependencies() {
+        GoogleSignInOptions signInOptions =
+               new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                       .requestEmail()
+                       .requestIdToken(oauthIdProd)
+                       .requestScopes(new Scope(SheetsScopes.SPREADSHEETS_READONLY))
+                       .requestScopes(new Scope(SheetsScopes.SPREADSHEETS))
+                        .build();
+
+        GoogleCrendentialSingleton.getInstance().mGoogleSignInClient = GoogleSignIn.getClient(this, signInOptions);
+        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential = GoogleAccountCredential
+                .usingOAuth2(this, Arrays.asList(SheetsScopes.SPREADSHEETS_READONLY))
+                .setBackOff(new ExponentialBackOff());
+
     }
 
     @Override
@@ -96,6 +200,34 @@ public class MainActivity extends AppCompatActivity {
         mAdapter.notifyDataSetChanged();
         mAdapter = new SpreadSheetAdapter(activity, spreadSheetList);
         recyclerView.setAdapter(mAdapter);
+    }
+
+    public void chooseAccount(Account[] accounts) {
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+        builderSingle.setTitle("Qual a conta a usar?");
+
+        List<Account> accountsList = Arrays.asList(accounts);
+        List<String> accountName = new ArrayList<>();
+        for (Account a :
+                accountsList) {
+            accountName.add(a.name);
+        }
+        final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice, accountName);
+
+        builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String strName = arrayAdapter.getItem(which);
+
+                Preferences.saveAccount(activity,strName);
+
+                setAccount();
+                loadSpreadSheatsList();
+                dialog.dismiss();
+            }
+        });
+
+        builderSingle.show();
     }
 
     public void addSpreadSheet(){

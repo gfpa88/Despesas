@@ -59,6 +59,19 @@ public class Preferences {
         scoreEditor.commit();
     }
 
+    public static void saveAccount(Activity context, String name){
+
+        SharedPreferences prefs = context.getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor scoreEditor = prefs.edit();
+        scoreEditor.putString("account", name);
+        scoreEditor.commit();
+    }
+
+    public static String loadAccount(Activity context){
+        SharedPreferences prefs = context.getPreferences(MODE_PRIVATE);
+        return prefs.getString("account",null);
+    }
+
     public static void cleanSpreadSheatsList(Activity context){
         SharedPreferences prefs = context.getPreferences(MODE_PRIVATE);
         Set<String> set = new HashSet<>();

@@ -4,7 +4,27 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.BatchClearValuesRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
+import com.google.api.services.sheets.v4.model.ClearValuesRequest;
+import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
+import com.google.api.services.sheets.v4.model.DimensionRange;
+import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.ValueRange;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +33,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +44,9 @@ import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -107,22 +131,51 @@ public class MovimentosActivity extends AppCompatActivity {
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-        RetrofitClient.getInstance().getMovimentos(id, new ApiCallBack() {
-            @Override
-            public void onSuccess(@NonNull Object value) {
-                movimentoList = ((Movimentos) value).getMovimentos();
-                Collections.reverse(movimentoList);
-                mAdapter = new MovimentosAdapter(activity, movimentoList);
-                recyclerView.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
-                progress.dismiss();
-            }
+        try {
 
-            @Override
-            public void onError(@NonNull Throwable throwable) {
-                progress.dismiss();
-            }
-        });
+            new Thread(() -> {
+                // do background stuff here
+                Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
+                        .setApplicationName("Sheets samples")
+                        .build();
+
+                List<List<Object>> movimentos = null;
+                try {
+
+                    movimentos = service.spreadsheets().values().get(id, "Movimentos!A:G").execute().getValues();
+                    movimentoList.clear();
+                    for (List<Object> movimento: movimentos) {
+                        Movimento m = new Movimento();
+                        m.setData(movimento.get(0).toString());
+                        m.setDescricao(movimento.get(1).toString());
+                        m.setValor(movimento.get(2).toString());
+                        m.setTipo(movimento.get(3).toString());
+                        m.setPessoa(movimento.get(4).toString());
+                        m.setMes(movimento.get(5).toString());
+                        m.setAno(movimento.get(6).toString());
+
+                        movimentoList.add(m);
+                    }
+                    movimentoList.remove(0);
+                    Collections.reverse(movimentoList);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                runOnUiThread(()->{
+                    mAdapter = new MovimentosAdapter(activity, movimentoList);
+                    recyclerView.setAdapter(mAdapter);
+                    mAdapter.notifyDataSetChanged();
+                    progress.dismiss();
+                    // OnPostExecute stuff here
+                });
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void deleteMovimentoList(int index){
@@ -132,20 +185,32 @@ public class MovimentosActivity extends AppCompatActivity {
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-        index = (movimentoList.size()-1) - index;
-        RetrofitClient.getInstance().deleteMovimento(id, index, new ApiCallBack() {
-            @Override
-            public void onSuccess(@NonNull Object value) {
-                progress.dismiss();
-                loadMovimentosList();
-            }
+        index = (movimentoList.size()+1) - index;
 
-            @Override
-            public void onError(@NonNull Throwable throwable) {
+
+        BatchClearValuesRequest content = new BatchClearValuesRequest();
+        content.setRanges(Arrays.asList("Movimentos!"+index+":"+index));
+
+
+
+        new Thread(() -> {
+            try {
+                Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
+                        .setApplicationName("Sheets samples")
+                        .build();
+
+                service.spreadsheets().values().batchClear(id, content).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            runOnUiThread(()->{
                 progress.dismiss();
                 loadMovimentosList();
-            }
-        });
+            });
+        }).start();
+
     }
 
     public void addMovimento(){
@@ -156,29 +221,54 @@ public class MovimentosActivity extends AppCompatActivity {
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-        RetrofitClient.getInstance().getCategorias(id, new ApiCallBack() {
-            @Override
-            public void onSuccess(@NonNull Object value) {
-                progress.dismiss();
 
-                Categorias result = (Categorias)value;
 
-                final List<String> pessoas = new ArrayList<>();
-                final List<String> tipos = new ArrayList<>();
+        new Thread(() -> {
+            // do background stuff here
+            Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
+                    .setApplicationName("Sheets samples")
+                    .build();
 
-                for(Categoria c : result.getCategorias()){
-                    if(c.getPessoa() != null && !c.getPessoa().isEmpty()) {
-                        pessoas.add(c.getPessoa());
-                    }
-                    if(c.getTipo() != null && !c.getTipo().isEmpty()) {
-                        tipos.add(c.getTipo());
-                    }
+            List<List<Object>> categorias = null;
+            List<Categoria> result = new ArrayList<>();
+            try {
+
+                categorias = service.spreadsheets().values().get(id, "Categorias!A:C").execute().getValues();
+
+                for (List<Object> c: categorias) {
+                    Categoria m = new Categoria();
+                    m.setTipo(c.get(0).toString());
+                    if(c.size() > 1)
+                    m.setAno(c.get(1).toString());
+                    if(c.size() > 2)
+                    m.setPessoa(c.get(2).toString());
+
+                    result.add(m);
                 }
+                result.remove(0);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
+            final List<String> pessoas = new ArrayList<>();
+            final List<String> tipos = new ArrayList<>();
+
+            for(Categoria c : result){
+                if(c.getPessoa() != null && !c.getPessoa().isEmpty()) {
+                    pessoas.add(c.getPessoa());
+                }
+                if(c.getTipo() != null && !c.getTipo().isEmpty()) {
+                    tipos.add(c.getTipo());
+                }
+            }
+            runOnUiThread(()->{
+                progress.dismiss();
                 ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
                 ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
 
-               final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
+                final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
                 final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_tipo);
                 tipo.setAdapter(adapterTipos);
 
@@ -229,20 +319,32 @@ public class MovimentosActivity extends AppCompatActivity {
                         if(now.get(Calendar.DAY_OF_MONTH) == selected.get(Calendar.DAY_OF_MONTH) && now.get(Calendar.MONTH) == selected.get(Calendar.MONTH) && now.get(Calendar.YEAR) == selected.get(Calendar.YEAR)){
                             dateToSend = new Date();
                         }
-                        RetrofitClient.getInstance().inserirMovimento(id, descricao.getText().toString(),valor.getText().toString().trim().isEmpty() ? "0": valor.getText().toString(), tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString(),pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString(), dateToSend, new ApiCallBack() {
-                            @Override
-                            public void onSuccess(@NonNull Object value) {
-                                progress.dismiss();
-                                loadMovimentosList();
-                            }
 
-                            @Override
-                            public void onError(@NonNull Throwable throwable) {
+                        List<Object> movimento = new ArrayList<>();
+                        movimento.add(date.getText().toString());
+                        movimento.add(descricao.getText().toString());
+                        movimento.add(valor.getText().toString().trim().isEmpty() ? "0": valor.getText().toString().replace(".",","));
+                        movimento.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
+                        movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
+                        movimento.add(""+selected.get(Calendar.MONTH +1));
+                        movimento.add(""+selected.get(Calendar.YEAR));
+
+
+                        ValueRange insert = new ValueRange();
+                        insert.setValues(Arrays.asList(movimento));
+                        insert.setRange("Movimentos!A:G");
+
+                        new Thread(() -> {
+                        try {
+                            service.spreadsheets().values().append(id, "Movimentos!A:G", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                            runOnUiThread(()->{
                                 progress.dismiss();
                                 loadMovimentosList();
-                            }
-                        });
-                        dialog.dismiss();
+                            });
+                        }).start();
                     }
                 });
                 builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
@@ -255,14 +357,9 @@ public class MovimentosActivity extends AppCompatActivity {
                 dialog = builder.create();
 // 3. Get the AlertDialog from create()
                 dialog.show();
-            }
-
-            @Override
-            public void onError(@NonNull Throwable throwable) {
-                progress.dismiss();
-                loadMovimentosList();
-            }
-        });
+                // OnPostExecute stuff here
+            });
+        }).start();
 
     }
 }

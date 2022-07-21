@@ -52,6 +52,7 @@ public class RetrofitClient {
                     .baseUrl("http://mpapi.ml/apinew/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .client(httpClient.build())
                     .build();
 
             client2 = new Retrofit.Builder()

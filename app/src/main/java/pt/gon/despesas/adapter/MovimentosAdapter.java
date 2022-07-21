@@ -82,10 +82,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
         Movimento movie = movimentosList.get(position);
         holder.value.setText(""+movie.getValor());
         holder.tipo.setText(movie.getTipo());
-        Date d = Preferences.convertToDate(movie.getData());
-        if (d!=null){
-            holder.date.setText(""+DateFormat.format("dd-MM-yyyy HH:mm:ss", d).toString());
-        }
+        holder.date.setText(movie.getData());
         holder.descricao.setText(movie.getDescricao());
         holder.pessoa.setText(movie.getPessoa());
     }
