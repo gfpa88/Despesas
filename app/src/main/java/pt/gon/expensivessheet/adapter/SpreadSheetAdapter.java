@@ -1,7 +1,5 @@
-package pt.gon.despesas.adapter;
+package pt.gon.expensivessheet.adapter;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import androidx.appcompat.app.AlertDialog;
@@ -9,15 +7,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.List;
 
-import pt.gon.despesas.MainActivity;
-import pt.gon.despesas.MovimentosActivity;
-import pt.gon.despesas.R;
-import pt.gon.despesas.SpreadSheet;
+import pt.gon.expensivessheet.MainActivity;
+import pt.gon.expensivessheet.MovimentosActivity;
+import pt.gon.expensivessheet.R;
+import pt.gon.expensivessheet.SpreadSheet;
 
 public class SpreadSheetAdapter extends RecyclerView.Adapter<SpreadSheetAdapter.MyViewHolder> {
 

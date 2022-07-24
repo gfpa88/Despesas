@@ -1,7 +1,8 @@
-package pt.gon.despesas;
+package pt.gon.expensivessheet;
 
 import android.accounts.Account;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
@@ -9,10 +10,10 @@ public class GoogleCrendentialSingleton {
 
     private static GoogleCrendentialSingleton instance;
 
-
+    GoogleSignInAccount account;
     GoogleSignInClient mGoogleSignInClient;
     GoogleAccountCredential mGoogleAccountCredential;
-    Account account;
+
 
     public static GoogleCrendentialSingleton getInstance()
     {

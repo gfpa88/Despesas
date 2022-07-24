@@ -1,4 +1,4 @@
-package pt.gon.despesas;
+package pt.gon.expensivessheet;
 
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("pt.gon.despesas", appContext.getPackageName());
+        assertEquals("pt.gon.expensivessheet", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package pt.gon.despesas.ws.model;
+package pt.gon.expensivessheet.ws.model;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;

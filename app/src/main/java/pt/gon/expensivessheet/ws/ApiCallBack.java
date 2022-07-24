@@ -1,4 +1,4 @@
-package pt.gon.despesas.ws;
+package pt.gon.expensivessheet.ws;
 
 import androidx.annotation.NonNull;
 

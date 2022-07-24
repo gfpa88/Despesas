@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     signingConfigs {
@@ -14,7 +15,7 @@ android {
     }
     compileSdkVersion 29
     defaultConfig {
-        applicationId "pt.gon.despesas"
+        applicationId 'pt.gon.expensivessheet'
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 11
@@ -66,7 +67,12 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.4'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'
+    implementation platform('com.google.firebase:firebase-bom:30.2.0')
+    implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.android.gms:play-services-auth:20.0.0'
     implementation 'com.google.api-client:google-api-client-android:1.33.0'
     implementation 'com.google.apis:google-api-services-sheets:v4-rev20210629-1.32.1'
+    implementation 'com.google.apis:google-api-services-drive:v3-rev197-1.25.0'
+
+
 }

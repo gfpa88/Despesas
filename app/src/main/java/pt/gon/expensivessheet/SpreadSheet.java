@@ -1,4 +1,4 @@
-package pt.gon.despesas;
+package pt.gon.expensivessheet;
 
 public class SpreadSheet {
     String id;

@@ -1,4 +1,4 @@
-package pt.gon.despesas.ws.model;
+package pt.gon.expensivessheet.ws.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

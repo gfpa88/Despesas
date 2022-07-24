@@ -1,20 +1,19 @@
-package pt.gon.despesas.adapter;
+package pt.gon.expensivessheet.adapter;
 
 import android.content.DialogInterface;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.format.DateFormat;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.Date;
 import java.util.List;
 
-import pt.gon.despesas.MovimentosActivity;
-import pt.gon.despesas.R;
-import pt.gon.despesas.ws.model.Movimento;
+import pt.gon.expensivessheet.MovimentosActivity;
+import pt.gon.expensivessheet.R;
+import pt.gon.expensivessheet.ws.model.Movimento;
 
 public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.MyViewHolder> {
 

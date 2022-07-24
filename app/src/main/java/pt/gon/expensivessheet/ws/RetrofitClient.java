@@ -1,4 +1,4 @@
-package pt.gon.despesas.ws;
+package pt.gon.expensivessheet.ws;
 
 import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
@@ -15,7 +15,7 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
-import pt.gon.despesas.adapter.Preferences;
+import pt.gon.expensivessheet.adapter.Preferences;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;

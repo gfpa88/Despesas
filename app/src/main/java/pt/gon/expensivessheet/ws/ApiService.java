@@ -1,16 +1,15 @@
-package pt.gon.despesas.ws;
+package pt.gon.expensivessheet.ws;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import okhttp3.ResponseBody;
-import pt.gon.despesas.ws.model.Categorias;
-import pt.gon.despesas.ws.model.Movimentos;
+import pt.gon.expensivessheet.ws.model.Categorias;
+import pt.gon.expensivessheet.ws.model.Movimentos;
 import retrofit2.Response;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {

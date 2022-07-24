@@ -1,4 +1,4 @@
-package pt.gon.despesas;
+package pt.gon.expensivessheet;
 
 import org.junit.Test;
 

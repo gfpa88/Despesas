@@ -1,7 +1,6 @@
-package pt.gon.despesas.adapter;
+package pt.gon.expensivessheet.adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
@@ -14,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import pt.gon.despesas.SpreadSheet;
+import pt.gon.expensivessheet.SpreadSheet;
 
 import static android.content.Context.MODE_PRIVATE;
 

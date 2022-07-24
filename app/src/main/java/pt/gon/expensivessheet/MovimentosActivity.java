@@ -1,31 +1,16 @@
-package pt.gon.despesas;
+package pt.gon.expensivessheet;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.BatchClearValuesRequest;
-import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
-import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
-import com.google.api.services.sheets.v4.model.ClearValuesRequest;
-import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
-import com.google.api.services.sheets.v4.model.DimensionRange;
-import com.google.api.services.sheets.v4.model.Request;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
-import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatSpinner;
@@ -34,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,14 +37,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import pt.gon.despesas.adapter.MovimentosAdapter;
-import pt.gon.despesas.adapter.Preferences;
-import pt.gon.despesas.ws.ApiCallBack;
-import pt.gon.despesas.ws.RetrofitClient;
-import pt.gon.despesas.ws.model.Categoria;
-import pt.gon.despesas.ws.model.Categorias;
-import pt.gon.despesas.ws.model.Movimento;
-import pt.gon.despesas.ws.model.Movimentos;
+import pt.gon.expensivessheet.adapter.MovimentosAdapter;
+import pt.gon.expensivessheet.adapter.Preferences;
+import pt.gon.expensivessheet.ws.model.Categoria;
+import pt.gon.expensivessheet.ws.model.Movimento;
 
 public class MovimentosActivity extends AppCompatActivity {
 
