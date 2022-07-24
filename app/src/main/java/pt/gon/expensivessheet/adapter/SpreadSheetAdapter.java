@@ -14,6 +14,7 @@ import java.util.List;
 import pt.gon.expensivessheet.MainActivity;
 import pt.gon.expensivessheet.MovimentosActivity;
 import pt.gon.expensivessheet.R;
+import pt.gon.expensivessheet.SheetActivity;
 import pt.gon.expensivessheet.SpreadSheet;
 
 public class SpreadSheetAdapter extends RecyclerView.Adapter<SpreadSheetAdapter.MyViewHolder> {
@@ -54,8 +55,9 @@ public class SpreadSheetAdapter extends RecyclerView.Adapter<SpreadSheetAdapter.
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(activity, MovimentosActivity.class);
+                Intent i = new Intent(activity, SheetActivity.class);
                 i.putExtra("id", id.getText());
+                i.putExtra("name", name.getText());
                 activity.startActivity(i);
             }
         });

@@ -31,4 +31,15 @@ public class GoogleCrendentialSingleton {
         // Constructor hidden because this is a singleton
     }
 
+    public GoogleSignInAccount getAccount() {
+        return account;
+    }
+
+    public GoogleSignInClient getmGoogleSignInClient() {
+        return mGoogleSignInClient;
+    }
+
+    public GoogleAccountCredential getmGoogleAccountCredential() {
+        return mGoogleAccountCredential;
+    }
 }

@@ -37,7 +37,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import pt.gon.expensivessheet.adapter.MovimentosAdapter;
+import pt.gon.expensivessheet.ui.dashboard.MovimentosAdapter;
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.ws.model.Categoria;
 import pt.gon.expensivessheet.ws.model.Movimento;
@@ -64,6 +64,7 @@ public class MovimentosActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -72,11 +73,10 @@ public class MovimentosActivity extends AppCompatActivity {
                 addMovimento();
             }
         });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         recyclerView = findViewById(R.id.recycler_spreedSheet);
 
-        mAdapter = new MovimentosAdapter(activity, movimentoList);
+       // mAdapter = new MovimentosAdapter(activity, movimentoList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -145,7 +145,7 @@ public class MovimentosActivity extends AppCompatActivity {
                 }
 
                 runOnUiThread(()->{
-                    mAdapter = new MovimentosAdapter(activity, movimentoList);
+//                    mAdapter = new MovimentosAdapter(activity, movimentoList);
                     recyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
                     progress.dismiss();

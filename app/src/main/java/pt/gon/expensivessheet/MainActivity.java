@@ -1,6 +1,5 @@
 package pt.gon.expensivessheet;
 
-import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -9,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -24,7 +22,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.ExponentialBackOff;
@@ -49,20 +46,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import pt.gon.expensivessheet.adapter.MovimentosAdapter;
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.adapter.SpreadSheetAdapter;
 import pt.gon.expensivessheet.ws.ApiCallBack;
 import pt.gon.expensivessheet.ws.RetrofitClient;
-import pt.gon.expensivessheet.ws.model.Movimento;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -111,12 +102,14 @@ public class MainActivity extends AppCompatActivity {
             floatExpanded= false;
             fabSearch.setVisibility(View.GONE);
             fab.setVisibility(View.GONE);
+            fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorAccent)));
             createNewSheet();
         });
         fabSearch.setOnClickListener(view -> {
             floatExpanded= false;
             fabSearch.setVisibility(View.GONE);
             fab.setVisibility(View.GONE);
+            fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorAccent)));
             fetchSheetsFromDrive();
         });
 
@@ -230,21 +223,13 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog;
         builder.setView(R.layout.add_spreadsheet);
         builder.setTitle("Adicionar Folha");
-        builder.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Dialog dialog2 = Dialog.class.cast(dialog);
-                EditText name = dialog2.findViewById(R.id.input_ss_name);
+        builder.setPositiveButton("Adicionar", (dialog12, which) -> {
+            Dialog dialog2 = Dialog.class.cast(dialog12);
+            EditText name = dialog2.findViewById(R.id.input_ss_name);
 
-                createNewSheetFromTemplate(name.getText().toString());
-            }
+            createNewSheetFromTemplate(name.getText().toString());
         });
-        builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton("Fechar", (dialog1, which) -> dialog1.dismiss());
 
         dialog = builder.create();
         dialog.show();

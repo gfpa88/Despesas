@@ -4,4 +4,8 @@
     <string name="title_activity_movimentos">Movimentos</string>
     <string name="draw_image">draw</string>
     <string name="select_items">Procurar</string>
+    <string name="title_activity_sheet">SheetActivity</string>
+    <string name="title_categorias">Categorias</string>
+    <string name="title_movimentos">Movimentos</string>
+    <string name="title_pessoas">Pessoas</string>
 </resources>
