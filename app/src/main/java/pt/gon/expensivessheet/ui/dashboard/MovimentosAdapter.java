@@ -1,13 +1,13 @@
 package pt.gon.expensivessheet.ui.dashboard;
 
 import android.content.DialogInterface;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import pt.gon.expensivessheet.ws.model.Movimento;
 public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.MyViewHolder> {
 
     private List<Movimento> movimentosList;
-    DashboardFragment fragment;
+    MovimentosFragment fragment;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView value, tipo, date, pessoa,descricao;
@@ -61,7 +61,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
     }
 
 
-    public MovimentosAdapter(DashboardFragment fragment, List<Movimento> movimentosList) {
+    public MovimentosAdapter(MovimentosFragment fragment, List<Movimento> movimentosList) {
         this.movimentosList = movimentosList;
         this.fragment = fragment;
     }

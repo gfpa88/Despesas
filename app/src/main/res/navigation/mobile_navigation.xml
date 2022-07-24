@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_movimentos"
-        android:name="pt.gon.expensivessheet.ui.dashboard.DashboardFragment"
+        android:name="pt.gon.expensivessheet.ui.dashboard.MovimentosFragment"
         android:label="@string/title_movimentos"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_movimentos" />
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="pt.gon.expensivessheet.ui.home.HomeFragment"
+        android:name="pt.gon.expensivessheet.ui.home.CategoriasFragment"
         android:label="@string/title_categorias"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_categorias" />
 
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="pt.gon.expensivessheet.ui.pessoas.PessoasFragment"
         android:label="@string/title_pessoas"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_pessoas" />
 </navigation>

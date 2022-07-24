@@ -12,7 +12,6 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,10 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.BatchClearValuesRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
-import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
-import com.google.api.services.sheets.v4.model.BatchUpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
 import com.google.api.services.sheets.v4.model.DimensionRange;
 import com.google.api.services.sheets.v4.model.Request;
@@ -35,16 +31,15 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.SimpleStringAdapter;
-import pt.gon.expensivessheet.databinding.FragmentHomeBinding;
+import pt.gon.expensivessheet.databinding.FragmentCategoriasBinding;
 import pt.gon.expensivessheet.ui.SheetFragment;
 
-public class HomeFragment extends SheetFragment {
+public class CategoriasFragment extends SheetFragment {
 
     private List<String> mlist = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -52,12 +47,12 @@ public class HomeFragment extends SheetFragment {
 
     String id;
     Activity activity;
-private FragmentHomeBinding binding;
+private FragmentCategoriasBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
 
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentCategoriasBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         activity = getActivity();

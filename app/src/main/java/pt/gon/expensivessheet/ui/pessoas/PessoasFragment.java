@@ -9,13 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
+
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,13 +36,12 @@ import java.util.List;
 import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.SimpleStringAdapter;
-import pt.gon.expensivessheet.databinding.FragmentHomeBinding;
-import pt.gon.expensivessheet.databinding.FragmentNotificationsBinding;
+import pt.gon.expensivessheet.databinding.FragmentPessoasBinding;
 import pt.gon.expensivessheet.ui.SheetFragment;
 
 public class PessoasFragment extends SheetFragment {
 
-private FragmentNotificationsBinding binding;
+private FragmentPessoasBinding binding;
     private List<String> mlist = new ArrayList<>();
     private RecyclerView recyclerView;
     private SimpleStringAdapter mAdapter;
@@ -57,7 +52,7 @@ private FragmentNotificationsBinding binding;
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
 
-    binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+    binding = FragmentPessoasBinding.inflate(inflater, container, false);
     View root = binding.getRoot();
 
         activity = getActivity();

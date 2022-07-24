@@ -1,32 +1,36 @@
-package pt.gon.expensivessheet;
+package pt.gon.expensivessheet.ui.dashboard;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.BatchClearValuesRequest;
-import com.google.api.services.sheets.v4.model.ValueRange;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
+import com.google.api.services.sheets.v4.model.DimensionRange;
+import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.Sheet;
+import com.google.api.services.sheets.v4.model.Spreadsheet;
+import com.google.api.services.sheets.v4.model.ValueRange;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,36 +41,33 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import pt.gon.expensivessheet.ui.dashboard.MovimentosAdapter;
+import pt.gon.expensivessheet.GoogleCrendentialSingleton;
+import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.Preferences;
-import pt.gon.expensivessheet.ws.model.Categoria;
+import pt.gon.expensivessheet.databinding.FragmentMovimentosBinding;
 import pt.gon.expensivessheet.ws.model.Movimento;
 
-public class MovimentosActivity extends AppCompatActivity {
+public class MovimentosFragment extends Fragment {
+
+    private FragmentMovimentosBinding binding;
 
     private List<Movimento> movimentoList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MovimentosAdapter mAdapter;
-    MovimentosActivity activity;
 
-    static View addViewMovimento;
-  //  String id = "1w6E8-hPQJcAOrtiCVJPx1fVp-dOH2aW25twURTCpOzU";
-    String id = "";
-    private Menu menu;
+    String id;
+    Activity activity;
+    public View onCreateView(@NonNull LayoutInflater inflater,
+            ViewGroup container, Bundle savedInstanceState) {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_movimentos);
-        activity = this;
+        binding = FragmentMovimentosBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
-        id = getIntent().getExtras().getString("id");
+        activity = getActivity();
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        id = getActivity().getIntent().getExtras().getString("id");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) binding.fab;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,39 +75,25 @@ public class MovimentosActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView = findViewById(R.id.recycler_spreedSheet);
+        recyclerView = binding.recyclerSpreedSheet;
 
-       // mAdapter = new MovimentosAdapter(activity, movimentoList);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mAdapter = new MovimentosAdapter( this, movimentoList);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
+        return root;
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-    }
-
-    public boolean onCreateOptionsMenu(Menu menu) {
-        this.menu = menu;
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.refreshMovimentos) {
-            loadMovimentosList();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        loadMovimentosList();
     }
 
     public void loadMovimentosList(){
 
-        final ProgressDialog progress = new ProgressDialog(this);
+        final ProgressDialog progress = new ProgressDialog(getActivity());
         progress.setTitle("A Carregar");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
@@ -117,14 +104,14 @@ public class MovimentosActivity extends AppCompatActivity {
                 // do background stuff here
                 Sheets service = new Sheets.Builder(new NetHttpTransport(),
                         GsonFactory.getDefaultInstance(),
-                        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
+                        GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
                         .setApplicationName("Sheets samples")
                         .build();
 
                 List<List<Object>> movimentos = null;
                 try {
 
-                    movimentos = service.spreadsheets().values().get(id, "Movimentos!A:G").execute().getValues();
+                    movimentos = service.spreadsheets().values().get(id, "Movimentos!A:E").execute().getValues();
                     movimentoList.clear();
                     for (List<Object> movimento: movimentos) {
                         Movimento m = new Movimento();
@@ -133,8 +120,6 @@ public class MovimentosActivity extends AppCompatActivity {
                         m.setValor(movimento.get(2).toString());
                         m.setTipo(movimento.get(3).toString());
                         m.setPessoa(movimento.get(4).toString());
-                        m.setMes(movimento.get(5).toString());
-                        m.setAno(movimento.get(6).toString());
 
                         movimentoList.add(m);
                     }
@@ -144,8 +129,8 @@ public class MovimentosActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                runOnUiThread(()->{
-//                    mAdapter = new MovimentosAdapter(activity, movimentoList);
+                getActivity().runOnUiThread(()->{
+                    mAdapter = new MovimentosAdapter(this, movimentoList);
                     recyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
                     progress.dismiss();
@@ -158,34 +143,69 @@ public class MovimentosActivity extends AppCompatActivity {
         }
     }
 
+    public void deleteRow(Integer StartIndex, Integer EndIndex) {
+        Spreadsheet spreadsheet = null;
+
+        Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                GsonFactory.getDefaultInstance(),
+                GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
+                .setApplicationName("Sheets samples")
+                .build();
+        try {
+            spreadsheet = service.spreadsheets().get(id).execute();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        BatchUpdateSpreadsheetRequest content = new BatchUpdateSpreadsheetRequest();
+        Request request = new Request();
+        DeleteDimensionRequest deleteDimensionRequest = new DeleteDimensionRequest();
+        DimensionRange dimensionRange = new DimensionRange();
+        dimensionRange.setDimension("ROWS");
+        dimensionRange.setStartIndex(StartIndex);
+        dimensionRange.setEndIndex(EndIndex);
+
+        Sheet sh = null;
+        for(Sheet s : spreadsheet.getSheets()){
+            if(s.getProperties().getTitle().equals("Movimentos")){
+                sh = s;
+                break;
+            }
+        }
+        dimensionRange.setSheetId(sh.getProperties().getSheetId());
+        deleteDimensionRequest.setRange(dimensionRange);
+
+        request.setDeleteDimension(deleteDimensionRequest);
+
+        List<Request> requests = new ArrayList<Request>();
+        requests.add(request);
+        content.setRequests(requests);
+
+        try {
+            service.spreadsheets().batchUpdate(id, content).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            dimensionRange = null;
+            deleteDimensionRequest = null;
+            request = null;
+            requests = null;
+            content = null;
+        }
+    }
+
     public void deleteMovimentoList(int index){
 
-        final ProgressDialog progress = new ProgressDialog(this);
+        final ProgressDialog progress = new ProgressDialog(getActivity());
         progress.setTitle("A Carregar");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-        index = (movimentoList.size()+1) - index;
-
-
-        BatchClearValuesRequest content = new BatchClearValuesRequest();
-        content.setRanges(Arrays.asList("Movimentos!"+index+":"+index));
-
-
 
         new Thread(() -> {
-            try {
-                Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
-                        .setApplicationName("Sheets samples")
-                        .build();
+           int indexFinal = movimentoList.size() - index;
 
-                service.spreadsheets().values().batchClear(id, content).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            runOnUiThread(()->{
+            deleteRow(indexFinal, indexFinal+1);
+            getActivity().runOnUiThread(()->{
                 progress.dismiss();
                 loadMovimentosList();
             });
@@ -196,7 +216,7 @@ public class MovimentosActivity extends AppCompatActivity {
     public void addMovimento(){
         // 1. Instantiate an AlertDialog.Builder with its constructor
 
-        final ProgressDialog progress = new ProgressDialog(this);
+        final ProgressDialog progress = new ProgressDialog(getActivity());
         progress.setTitle("A Carregar");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
@@ -207,43 +227,36 @@ public class MovimentosActivity extends AppCompatActivity {
             // do background stuff here
             Sheets service = new Sheets.Builder(new NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
-                    GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
+                    GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
                     .setApplicationName("Sheets samples")
                     .build();
 
-            List<List<Object>> categorias = null;
-            List<Categoria> result = new ArrayList<>();
+
+
+            final List<String> pessoas = new ArrayList<>();
+            final List<String> tipos = new ArrayList<>();
             try {
 
-                categorias = service.spreadsheets().values().get(id, "Categorias!A:C").execute().getValues();
+                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, "Categorias!A:A").execute().getValues();
 
-                for (List<Object> c: categorias) {
-                    Categoria m = new Categoria();
-                    m.setTipo(c.get(0).toString());
-                    if(c.size() > 1)
-                    m.setAno(c.get(1).toString());
-                    if(c.size() > 2)
-                    m.setPessoa(c.get(2).toString());
-
-                    result.add(m);
+                for (List<Object> c: categoriasDrive) {
+                    for( Object t: c) {
+                        tipos.add(t.toString());
+                    }
                 }
-                result.remove(0);
+
+                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, "Pessoas!A:A").execute().getValues();
+
+                for (List<Object> c: pessoasDrive) {
+                    for( Object t: c) {
+                        pessoas.add(t.toString());
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            final List<String> pessoas = new ArrayList<>();
-            final List<String> tipos = new ArrayList<>();
-
-            for(Categoria c : result){
-                if(c.getPessoa() != null && !c.getPessoa().isEmpty()) {
-                    pessoas.add(c.getPessoa());
-                }
-                if(c.getTipo() != null && !c.getTipo().isEmpty()) {
-                    tipos.add(c.getTipo());
-                }
-            }
-            runOnUiThread(()->{
+            getActivity().runOnUiThread(()->{
                 progress.dismiss();
                 ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
                 ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
@@ -266,7 +279,7 @@ public class MovimentosActivity extends AppCompatActivity {
                 simpleCalendarView.setDate((new Date()).getTime());
                 simpleCalendarView.setOnDateChangeListener( new CalendarView.OnDateChangeListener() {
                     public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                        Calendar  calendar = new GregorianCalendar( year, month, dayOfMonth );
+                        Calendar calendar = new GregorianCalendar( year, month, dayOfMonth );
                         date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
                     }
                 });
@@ -303,24 +316,24 @@ public class MovimentosActivity extends AppCompatActivity {
                         List<Object> movimento = new ArrayList<>();
                         movimento.add(date.getText().toString());
                         movimento.add(descricao.getText().toString());
-                        movimento.add(valor.getText().toString().trim().isEmpty() ? "0": valor.getText().toString().replace(".",","));
+                        Double valorDouble = Double.parseDouble(valor.getText().toString().trim().isEmpty() ? "0": valor.getText().toString().replace(".",","));
+                        movimento.add(valorDouble);
                         movimento.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
                         movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
                         movimento.add(""+selected.get(Calendar.MONTH +1));
                         movimento.add(""+selected.get(Calendar.YEAR));
-
 
                         ValueRange insert = new ValueRange();
                         insert.setValues(Arrays.asList(movimento));
                         insert.setRange("Movimentos!A:G");
 
                         new Thread(() -> {
-                        try {
-                            service.spreadsheets().values().append(id, "Movimentos!A:G", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                            runOnUiThread(()->{
+                            try {
+                                service.spreadsheets().values().append(id, "Movimentos!A:G", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            getActivity().runOnUiThread(()->{
                                 progress.dismiss();
                                 loadMovimentosList();
                             });
@@ -341,5 +354,11 @@ public class MovimentosActivity extends AppCompatActivity {
             });
         }).start();
 
+    }
+
+    @Override
+        public void onDestroyView() {
+            super.onDestroyView();
+            binding = null;
     }
 }
