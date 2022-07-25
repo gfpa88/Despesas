@@ -70,12 +70,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private SpreadSheetAdapter mAdapter;
     MainActivity activity;
-    GoogleSignInClient mGoogleSignInClient;
-    GoogleAccountCredential mGoogleAccountCredential;
 
-    String oauthIdProd = "373460637778-ab200008rq1dc10mdjlnfmp6q150l98t.apps.googleusercontent.com";
+    final String oauthIdProd = "373460637778-ab200008rq1dc10mdjlnfmp6q150l98t.apps.googleusercontent.com";
 
-    String oauthIdOld = "713935152996-benuarkk1c14ivvnv68uvfk98v6c1rli.apps.googleusercontent.com";
 
     boolean floatExpanded = false;
     @SuppressLint("RestrictedApi")

@@ -13,13 +13,13 @@ android {
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId 'pt.gon.expensivessheet'
         minSdkVersion 23
-        targetSdkVersion 29
-        versionCode 11
-        versionName "1.11"
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         signingConfig signingConfigs.config
     }
