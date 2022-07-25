@@ -98,6 +98,7 @@ private FragmentCategoriasBinding binding;
 
                 try {
 
+
                     List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, "Categorias!A:A").execute().getValues();
                     mlist.clear();
                     for (List<Object> c: categoriasDrive) {

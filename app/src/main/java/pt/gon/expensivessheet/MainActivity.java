@@ -234,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
+
     public void createNewSheetFromTemplate(String name){
 
         final ProgressDialog progress = new ProgressDialog(this);
@@ -272,16 +273,11 @@ public class MainActivity extends AppCompatActivity {
                         System.err.println("Unable to upload file: " + e.getDetails());
                         throw e;
                     }
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 runOnUiThread(()->{
-                    // mAdapter = new MovimentosAdapter(activity, movimentoList);
-                    // recyclerView.setAdapter(mAdapter);
-                    // mAdapter.notifyDataSetChanged();
                     progress.dismiss();
                     loadSpreadSheatsList();
                     // OnPostExecute stuff here
