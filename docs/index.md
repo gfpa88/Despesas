@@ -2,6 +2,8 @@
 
 Esta é uma aplicação android que permite registar movimentos numa Folha de Cálculo do Google. 
 
+<a href='https://play.google.com/store/apps/details?id=pt.gon.expensivessheet&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Disponível no Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/pt_badge_web_generic.png'/></a>
+
 O objetivo é facilitar a inserção desses mesmos dados através de uma aplicação simples. 
 Esta folha pode ser individual ou partilhada entre várias pessoas.
 
