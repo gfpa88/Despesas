@@ -16,4 +16,4 @@ Os dados estão guardadso exclusivamente na Folha de Cálculo do Google e criado
 
 ### Disclosure
 Não nos responsabilizamos por qualquer informação que seja tornada pública proveniente das folhas de Cálculo criadas pela aplicação. 
-Ao usar esta aplicação, a resposabilidade da folha criada é da responsabilidade de quem a criou,
+Ao usar esta aplicação, a resposabilidade da folha criada é da responsabilidade de quem a criou.
