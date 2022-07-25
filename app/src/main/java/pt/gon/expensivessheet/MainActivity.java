@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,8 @@ import com.google.api.services.drive.model.FileList;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.ValueRange;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initDependencies();
         activity = this;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -124,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
 
-        Intent signInIntent = GoogleCrendentialSingleton.getInstance().mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+
+        initDependencies();
 
     }
 
@@ -186,6 +188,23 @@ public class MainActivity extends AppCompatActivity {
                 .usingOAuth2(this, Arrays.asList(SheetsScopes.SPREADSHEETS_READONLY, SheetsScopes.SPREADSHEETS, SheetsScopes.DRIVE_READONLY, SheetsScopes.DRIVE_FILE))
                 .setBackOff(new ExponentialBackOff());
 
+        if(GoogleCrendentialSingleton.getInstance().account == null){
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            AlertDialog dialog;
+            builder.setView(R.layout.help);
+            builder.setTitle("Bem Vindo");
+            builder.setPositiveButton("Avançar", (dialog12, which) -> {
+                Intent signInIntent = GoogleCrendentialSingleton.getInstance().mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
+            });
+            builder.setNegativeButton("Fechar", (dialog1, which) -> finish());
+
+            dialog = builder.create();
+            dialog.show();
+        }else {
+            Intent signInIntent = GoogleCrendentialSingleton.getInstance().mGoogleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        }
     }
 
     @Override

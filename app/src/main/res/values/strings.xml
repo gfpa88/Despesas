@@ -8,4 +8,5 @@
     <string name="title_categorias">Categorias</string>
     <string name="title_movimentos">Movimentos</string>
     <string name="title_pessoas">Pessoas</string>
+    <string name="welcome_message">Olá, esta aplicação guarda todos os dados numa Folha de Cálculo do Google.\n\nÉ possível criar várias folhas e também partilhar com alguém caso queiras torná-la numa folha conjunta.\n\nÉ necessário por isso acesso ao google drive, local onde vão ficar guardadas as folhas de forma privada.</string>
 </resources>
