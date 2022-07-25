@@ -1,4 +1,4 @@
-package pt.gon.expensivessheet.ui.dashboard;
+package pt.gon.expensivessheet.ui.movimentos;
 
 import android.app.Activity;
 import android.app.ProgressDialog;

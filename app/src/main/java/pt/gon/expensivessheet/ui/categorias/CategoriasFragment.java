@@ -1,4 +1,4 @@
-package pt.gon.expensivessheet.ui.home;
+package pt.gon.expensivessheet.ui.categorias;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
@@ -125,8 +127,7 @@ private FragmentCategoriasBinding binding;
         }
     }
 
-
-    public void deleteRow(Integer StartIndex, Integer EndIndex) {
+    public void deleteRow(Integer StartIndex, Integer EndIndex) throws IOException {
         Spreadsheet spreadsheet = null;
 
         Sheets service = new Sheets.Builder(new NetHttpTransport(),
@@ -163,17 +164,8 @@ private FragmentCategoriasBinding binding;
         requests.add(request);
         content.setRequests(requests);
 
-        try {
             service.spreadsheets().batchUpdate(id, content).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            dimensionRange = null;
-            deleteDimensionRequest = null;
-            request = null;
-            requests = null;
-            content = null;
-        }
+
     }
 
     public void delete(int index){
@@ -183,10 +175,7 @@ private FragmentCategoriasBinding binding;
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-//        index = index;
-
-
-
+        AtomicBoolean error = new AtomicBoolean(false);
         Request request = new Request()
                 .setDeleteDimension(new DeleteDimensionRequest()
                         .setRange(new DimensionRange()
@@ -200,9 +189,19 @@ private FragmentCategoriasBinding binding;
         requests.add(request);
 
         new Thread(() -> {
-            deleteRow(index,index+1);
+            try {
+                deleteRow(index, index + 1);
+            }catch (Exception e){
+                e.printStackTrace();
+                error.set(true);
+            }
             getActivity().runOnUiThread(()->{
                 progress.dismiss();
+
+                if(error.get()){
+                    Toast.makeText(getContext(), "Ocorreu um erro!",
+                            Toast.LENGTH_LONG).show();
+                }
                 load();
             });
         }).start();
@@ -210,6 +209,7 @@ private FragmentCategoriasBinding binding;
     }
 
     public void add(){
+        AtomicBoolean error = new AtomicBoolean(false);
         final ProgressDialog progress = new ProgressDialog(getActivity());
         progress.setTitle("A Carregar");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
@@ -239,9 +239,14 @@ private FragmentCategoriasBinding binding;
                         service.spreadsheets().values().append(id, "Categorias!A:A", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
                     } catch (IOException e) {
                         e.printStackTrace();
+                        error.set(true);
                     }
                     getActivity().runOnUiThread(()->{
                         progress.dismiss();
+                        if(error.get()){
+                            Toast.makeText(getContext(), "Ocorreu um erro a enviar o convite!",
+                                    Toast.LENGTH_LONG).show();
+                        }
                         load();
                     });
                 }).start();

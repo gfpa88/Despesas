@@ -1,4 +1,4 @@
-package pt.gon.expensivessheet.ui.dashboard;
+package pt.gon.expensivessheet.ui.movimentos;
 
 import android.content.DialogInterface;
 import android.view.LayoutInflater;

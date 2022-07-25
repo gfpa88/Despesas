@@ -7,13 +7,13 @@
 
     <fragment
         android:id="@+id/navigation_movimentos"
-        android:name="pt.gon.expensivessheet.ui.dashboard.MovimentosFragment"
+        android:name="pt.gon.expensivessheet.ui.movimentos.MovimentosFragment"
         android:label="@string/title_movimentos"
         tools:layout="@layout/fragment_movimentos" />
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="pt.gon.expensivessheet.ui.home.CategoriasFragment"
+        android:name="pt.gon.expensivessheet.ui.categorias.CategoriasFragment"
         android:label="@string/title_categorias"
         tools:layout="@layout/fragment_categorias" />
 

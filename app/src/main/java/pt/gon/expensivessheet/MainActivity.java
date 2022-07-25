@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -44,10 +45,13 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.ValueRange;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.adapter.SpreadSheetAdapter;
@@ -237,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void createNewSheetFromTemplate(String name){
 
+        AtomicBoolean error = new AtomicBoolean(false);
         final ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("A criar folha");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
@@ -251,34 +256,57 @@ public class MainActivity extends AppCompatActivity {
                         .setApplicationName("ExpensivesSheet")
                         .build();
 
-                try {
 
-                    Drive.Files.List request = driveService.files().list()
-                            .setQ("mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false")
-                            .setFields("nextPageToken, files(id, name)");
 
                     // Upload file photo.jpg on drive.
                     File fileMetadata = new File();
                     fileMetadata.setName(name.contains("espesas")?name:"Despesas_"+name);
-
+                    File file = null;
                     try {
 
-                        File file = driveService.files().copy("1pWBcxtCqormzzboJrqeA8tRyemNkTwMJBwFywA7nJ4c", fileMetadata)
+                        file = driveService.files().copy("11e2kQPOZzim96wphESu3LaKAAoucuv6k5S_f3dQiJms", fileMetadata)
                                 .setFields("id,name")
                                 .execute();
 
                         Preferences.saveSpreadSheatsList(activity,file.getName(),file.getId());
+
+
                     }catch (GoogleJsonResponseException e) {
                         // TODO(developer) - handle error appropriately
                         System.err.println("Unable to upload file: " + e.getDetails());
-                        throw e;
+                        error.set(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        error.set(true);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+                if(!error.get() && file != null) {
+                    try {
+                            Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                                    GsonFactory.getDefaultInstance(),
+                                    GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
+                                    .setApplicationName("Sheets samples")
+                                    .build();
+                        List<Object> cat = new ArrayList<>();
+                        cat.add(GoogleCrendentialSingleton.getInstance().getAccount().getDisplayName());
+
+                        ValueRange insert = new ValueRange();
+                        insert.setValues(Arrays.asList(cat));
+                        insert.setRange("Pessoas!A:A");
+
+                            service.spreadsheets().values().append(file.getId(), "Pessoas!A:A", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
                 runOnUiThread(()->{
                     progress.dismiss();
+                    if(error.get()){
+                        Toast.makeText(getApplicationContext(), "Ocorreu um erro!",
+                                Toast.LENGTH_LONG).show();
+                    }
                     loadSpreadSheatsList();
                     // OnPostExecute stuff here
                 });
