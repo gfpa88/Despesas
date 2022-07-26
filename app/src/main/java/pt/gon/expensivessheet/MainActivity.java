@@ -31,6 +31,7 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -66,13 +67,15 @@ public class MainActivity extends AppCompatActivity {
 
     boolean floatExpanded = false;
 
+    ProgressDialog progress;
+
     @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         activity = this;
-
+        progress = new ProgressDialog(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fabExpand = findViewById(R.id.fabExpand);
@@ -123,18 +126,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        progress.dismiss();
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            boolean success = handleSignInResult(task);
+            boolean success = false;
+            try {
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                success = handleSignInResult(task);
+            } catch (Exception e) {
+                e.printStackTrace();
+                success = false;
+            }
             if (success) {
                 loadSpreadSheatsList();
             } else {
-                Toast.makeText(getApplicationContext(), "Ocorreu um erro a Obter as credenciais de acesso!",
-                        Toast.LENGTH_LONG).show();
+                AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
+                builderSingle.setTitle(R.string.error_getting_credentials);
+
+                AlertDialog dialog;
+                builderSingle.setPositiveButton(R.string.dialog_retry_button, (dialogInterface, i) ->
+                        initDependencies());
+                builderSingle.setNeutralButton(R.string.close_button, (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                    finish();
+                });
+                dialog = builderSingle.create();
+                dialog.show();
             }
         }
     }
@@ -143,9 +162,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            GoogleCrendentialSingleton.getInstance().account = account;
-            GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential.setSelectedAccount(account.getAccount());
-            GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential.setSelectedAccountName(account.getAccount().name);
+            GoogleCrendentialSingleton.getInstance().setAccount(account);
+            GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential().setSelectedAccount(account.getAccount());
             Log.i(TAG, "sign in" + account.toString());
             return true;
         } catch (ApiException e) {
@@ -160,6 +178,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     void initDependencies() {
+
+        progress.setTitle(getString(R.string.dialog_loading));
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
         GoogleSignInOptions signInOptions =
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestEmail()
@@ -170,17 +192,19 @@ public class MainActivity extends AppCompatActivity {
                         .requestScopes(new Scope(SheetsScopes.DRIVE_FILE))
                         .build();
 
-        GoogleCrendentialSingleton.getInstance().mGoogleSignInClient = GoogleSignIn.getClient(this, signInOptions);
-        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential = GoogleAccountCredential
+        GoogleCrendentialSingleton.getInstance().setmGoogleSignInClient(GoogleSignIn.getClient(this, signInOptions));
+        GoogleCrendentialSingleton.getInstance().setmGoogleAccountCredential(GoogleAccountCredential
                 .usingOAuth2(this, Arrays.asList(SheetsScopes.SPREADSHEETS_READONLY, SheetsScopes.SPREADSHEETS, SheetsScopes.DRIVE_READONLY, SheetsScopes.DRIVE_FILE))
-                .setBackOff(new ExponentialBackOff());
+                .setBackOff(new ExponentialBackOff()));
 
         if (GoogleCrendentialSingleton.getInstance().account == null) {
+            progress.dismiss();
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             AlertDialog dialog;
             builder.setView(R.layout.help);
             builder.setTitle(R.string.dialog_welcome_title);
             builder.setPositiveButton(R.string.dialog_welcome_next, (dialog12, which) -> {
+                progress.show();
                 Intent signInIntent = GoogleCrendentialSingleton.getInstance().mGoogleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             });
@@ -252,7 +276,10 @@ public class MainActivity extends AppCompatActivity {
                     Preferences.saveSpreadSheatsList(activity, file.getName(), file.getId());
 
 
-                } catch (GoogleJsonResponseException e) {
+                }  catch (UserRecoverableAuthIOException e) {
+                    startActivityForResult(e.getIntent(), RC_SIGN_IN);
+                    return;
+                }catch (GoogleJsonResponseException e) {
                     // TODO(developer) - handle error appropriately
                     System.err.println("Unable to upload file: " + e.getDetails());
                     error.set(true);
@@ -277,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
 
                         service.spreadsheets().values().append(file.getId(), getString(R.string.sheet_tab_persons), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
 
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -311,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                 // do background stuff here
                 Drive driveService = new Drive.Builder(new NetHttpTransport(),
                         GsonFactory.getDefaultInstance(),
-                        GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
+                        GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
                         .setApplicationName(getString(R.string.app_name))
                         .build();
 
@@ -327,7 +354,8 @@ public class MainActivity extends AppCompatActivity {
                     FileList result = request.execute();
 
                     files = result.getFiles();
-
+                } catch (UserRecoverableAuthIOException e) {
+                    startActivityForResult(e.getIntent(), RC_SIGN_IN);
                 } catch (Exception e) {
                     e.printStackTrace();
                     error = true;
@@ -409,10 +437,10 @@ public class MainActivity extends AppCompatActivity {
                     progress.dismiss();
                     if (finalError) {
                         AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
-                        builderSingle.setTitle("Folha de cálculo não compatível!!");
+                        builderSingle.setTitle(R.string.error_invalid_sheet);
 
                         AlertDialog dialog;
-                        builderSingle.setNeutralButton("Fechar", new DialogInterface.OnClickListener() {
+                        builderSingle.setNeutralButton(R.string.close_button, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
