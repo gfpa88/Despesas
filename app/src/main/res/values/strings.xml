@@ -1,5 +1,12 @@
 <resources>
     <string name="app_name">Folha de Despesas</string>
+    <string name="sheet_tab_persons">Pessoas!A:A</string>
+    <string name="sheet_tab_category">Categorias!A:A</string>
+    <string name="sheet_tab_expensive_insert">Movimentos!A:G</string>
+    <string name="sheet_tab_expensive_load">Movimentos!A:E</string>
+    <string name="sheet_tab_category_name">Categorias</string>
+    <string name="sheet_tab_entry_name">Movimentos</string>
+    <string name="sheet_tab_persons_name">Pessoas</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_movimentos">Movimentos</string>
     <string name="draw_image">draw</string>
@@ -9,4 +16,27 @@
     <string name="title_movimentos">Movimentos</string>
     <string name="title_pessoas">Pessoas</string>
     <string name="welcome_message">Olá, esta aplicação guarda todos os dados numa Folha de Cálculo do Google.\n\nÉ possível criar várias folhas e também partilhar com alguém caso queiras torná-la numa folha conjunta.\n\nÉ necessário por isso acesso ao google drive, local onde vão ficar guardadas as folhas de forma privada.</string>
+    <string name="error_share">Ocorreu um erro a enviar o convite!</string>
+    <string name="sucess_share">Convite enviado!</string>
+    <string name="global_error">Ocorreu um erro!</string>
+    <string name="dialog_share_title">Partilhar folha</string>
+    <string name="dialog_share_positive_button">Partilhar</string>
+    <string name="close_button">Fechar</string>
+    <string name="dialog_share_submit">A partilhar...</string>
+    <string name="dialog_create_sheet_title">A criar folha</string>
+    <string name="add_button">Adicionar</string>
+    <string name="dialog_new_sheet_title">Adicionar Folha</string>
+    <string name="dialog_welcome_title">Bem Vindo</string>
+    <string name="dialog_welcome_next">Avançar</string>
+    <string name="dialog_loading">A Carregar</string>
+    <string name="dialog_import_sheet_title">Qual a folha a importar?</string>
+    <string name="dialog_delete_entry">Remover Movimento</string>
+    <string name="dialog_delete_entry_message">Queres eliminar este movimento?</string>
+    <string name="delete_button">Eliminar</string>
+    <string name="dialog_delete_sheet_title">Remover Folha</string>
+    <string name="dialog_delete_sheet_message">Queres eliminar a folha?</string>
+    <string name="dialog_add_category_title">Adicionar Categoria</string>
+    <string name="dialog_delete_entry_title">Remover Movimento</string>
+    <string name="dialog_add_entry_title">Adicionar Movimento</string>
+    <string name="dialog_add_person_title">Adicionar Pessoa</string>
 </resources>

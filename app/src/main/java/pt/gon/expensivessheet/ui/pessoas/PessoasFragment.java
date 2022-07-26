@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -41,7 +42,7 @@ import pt.gon.expensivessheet.ui.SheetFragment;
 
 public class PessoasFragment extends SheetFragment {
 
-private FragmentPessoasBinding binding;
+    private FragmentPessoasBinding binding;
     private List<String> mlist = new ArrayList<>();
     private RecyclerView recyclerView;
     private SimpleStringAdapter mAdapter;
@@ -50,21 +51,21 @@ private FragmentPessoasBinding binding;
     Activity activity;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
-            ViewGroup container, Bundle savedInstanceState) {
+                             ViewGroup container, Bundle savedInstanceState) {
 
-    binding = FragmentPessoasBinding.inflate(inflater, container, false);
-    View root = binding.getRoot();
+        binding = FragmentPessoasBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
         activity = getActivity();
 
         id = getActivity().getIntent().getExtras().getString("id");
 
-        FloatingActionButton fab =binding.fab;
+        FloatingActionButton fab = binding.fab;
         fab.setOnClickListener(view -> add());
 
         recyclerView = binding.recyclerSpreedSheet;
 
-        mAdapter = new SimpleStringAdapter( this, mlist);
+        mAdapter = new SimpleStringAdapter(this, mlist);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -79,41 +80,49 @@ private FragmentPessoasBinding binding;
         load();
     }
 
-    public void load(){
+    public void load() {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
         try {
 
             new Thread(() -> {
+                boolean error = false;
                 // do background stuff here
                 Sheets service = new Sheets.Builder(new NetHttpTransport(),
                         GsonFactory.getDefaultInstance(),
                         GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                        .setApplicationName("Sheets samples")
+                        .setApplicationName(getString(R.string.app_name))
                         .build();
 
                 try {
 
-                    List<List<Object>> drive = service.spreadsheets().values().get(id, "Pessoas!A:A").execute().getValues();
+                    List<List<Object>> drive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_persons)).execute().getValues();
                     mlist.clear();
-                    for (List<Object> c: drive) {
-                        for( Object t: c) {
+                    for (List<Object> c : drive) {
+                        for (Object t : c) {
                             mlist.add(t.toString());
                         }
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
+                    error = true;
                 }
 
-                getActivity().runOnUiThread(()->{
-                    mAdapter = new SimpleStringAdapter(this, mlist);
-                    recyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                boolean finalError = error;
+                getActivity().runOnUiThread(() -> {
+                    if(finalError){
+                        Toast.makeText(getContext(), getString(R.string.global_error),
+                                Toast.LENGTH_LONG).show();
+                    }else {
+                        mAdapter = new SimpleStringAdapter(this, mlist);
+                        recyclerView.setAdapter(mAdapter);
+                        mAdapter.notifyDataSetChanged();
+                    }
                     progress.dismiss();
                     // OnPostExecute stuff here
                 });
@@ -124,13 +133,13 @@ private FragmentPessoasBinding binding;
         }
     }
 
-    public void deleteRow(Integer StartIndex, Integer EndIndex) {
+    public boolean deleteRow(Integer StartIndex, Integer EndIndex) {
         Spreadsheet spreadsheet = null;
 
         Sheets service = new Sheets.Builder(new NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
                 GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                .setApplicationName("Sheets samples")
+                .setApplicationName(getString(R.string.app_name))
                 .build();
         try {
             spreadsheet = service.spreadsheets().get(id).execute();
@@ -146,8 +155,8 @@ private FragmentPessoasBinding binding;
         dimensionRange.setEndIndex(EndIndex);
 
         Sheet sh = null;
-        for(Sheet s : spreadsheet.getSheets()){
-            if(s.getProperties().getTitle().equals("Pessoas")){
+        for (Sheet s : spreadsheet.getSheets()) {
+            if (s.getProperties().getTitle().equals(getString(R.string.sheet_tab_persons_name))) {
                 sh = s;
                 break;
             }
@@ -165,6 +174,7 @@ private FragmentPessoasBinding binding;
             service.spreadsheets().batchUpdate(id, content).execute();
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         } finally {
             dimensionRange = null;
             deleteDimensionRequest = null;
@@ -172,18 +182,15 @@ private FragmentPessoasBinding binding;
             requests = null;
             content = null;
         }
+        return true;
     }
 
-    public void delete(int index){
+    public void delete(int index) {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
-
-//        index = index;
-
-
 
         Request request = new Request()
                 .setDeleteDimension(new DeleteDimensionRequest()
@@ -198,63 +205,68 @@ private FragmentPessoasBinding binding;
         requests.add(request);
 
         new Thread(() -> {
-            deleteRow(index,index+1);
-            getActivity().runOnUiThread(()->{
+            boolean success = deleteRow(index, index + 1);
+            getActivity().runOnUiThread(() -> {
                 progress.dismiss();
-                load();
+                if(!success){
+                    Toast.makeText(getContext(), getString(R.string.global_error),
+                            Toast.LENGTH_LONG).show();
+                }else {
+                    load();
+                }
             });
         }).start();
 
     }
 
-    public void add(){
+    public void add() {
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         // 1. Instantiate an AlertDialog.Builder with its constructor
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         AlertDialog dialog;
         builder.setView(R.layout.add_spreadsheet);
-        builder.setTitle("Adicionar Pessoa");
-        builder.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Dialog dialog2 = Dialog.class.cast(dialog);
-                EditText name = dialog2.findViewById(R.id.input_ss_name);
-                List<Object> cat = new ArrayList<>();
-                cat.add(name.getText().toString());
-                ValueRange insert = new ValueRange();
-                insert.setValues(Arrays.asList(cat));
-                insert.setRange("Pessoas!A:A");
+        builder.setTitle(R.string.dialog_add_person_title);
+        builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
+            Dialog dialog2 = Dialog.class.cast(dialog1);
+            EditText name = dialog2.findViewById(R.id.input_ss_name);
+            List<Object> cat = new ArrayList<>();
+            cat.add(name.getText().toString());
+            ValueRange insert = new ValueRange();
+            insert.setValues(Arrays.asList(cat));
+            insert.setRange(getString(R.string.sheet_tab_persons));
 
-                new Thread(() -> {
-                    try {
-                        Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                                GsonFactory.getDefaultInstance(),
-                                GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                                .setApplicationName("Sheets samples")
-                                .build();
-                        service.spreadsheets().values().append(id, "Pessoas!A:A", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    getActivity().runOnUiThread(()->{
-                        progress.dismiss();
+            new Thread(() -> {
+                boolean error = false;
+                try {
+                    Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                            GsonFactory.getDefaultInstance(),
+                            GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
+                            .setApplicationName(getString(R.string.app_name))
+                            .build();
+                    service.spreadsheets().values().append(id, getString(R.string.sheet_tab_persons), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    error = true;
+                }
+                boolean finalError = error;
+                getActivity().runOnUiThread(() -> {
+                    progress.dismiss();
+                    if(finalError){
+                        Toast.makeText(getContext(), getString(R.string.global_error),
+                                Toast.LENGTH_LONG).show();
+                    }else{
                         load();
-                    });
-                }).start();
-            }
+
+                    }
+                });
+            }).start();
         });
-        builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
 
         dialog = builder.create();
         dialog.show();
-
 
 
     }

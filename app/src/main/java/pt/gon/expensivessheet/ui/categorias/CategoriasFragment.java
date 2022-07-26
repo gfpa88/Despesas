@@ -49,10 +49,10 @@ public class CategoriasFragment extends SheetFragment {
 
     String id;
     Activity activity;
-private FragmentCategoriasBinding binding;
+    private FragmentCategoriasBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
-            ViewGroup container, Bundle savedInstanceState) {
+                             ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentCategoriasBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -61,12 +61,12 @@ private FragmentCategoriasBinding binding;
 
         id = getActivity().getIntent().getExtras().getString("id");
 
-        FloatingActionButton fab =binding.fab;
+        FloatingActionButton fab = binding.fab;
         fab.setOnClickListener(view -> add());
 
         recyclerView = binding.recyclerSpreedSheet;
 
-        mAdapter = new SimpleStringAdapter( this, mlist);
+        mAdapter = new SimpleStringAdapter(this, mlist);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -81,10 +81,10 @@ private FragmentCategoriasBinding binding;
         load();
     }
 
-    public void load(){
+    public void load() {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
@@ -95,16 +95,14 @@ private FragmentCategoriasBinding binding;
                 Sheets service = new Sheets.Builder(new NetHttpTransport(),
                         GsonFactory.getDefaultInstance(),
                         GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                        .setApplicationName("Sheets samples")
+                        .setApplicationName(getString(R.string.app_name))
                         .build();
 
                 try {
-
-
-                    List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, "Categorias!A:A").execute().getValues();
+                    List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_category)).execute().getValues();
                     mlist.clear();
-                    for (List<Object> c: categoriasDrive) {
-                        for( Object t: c) {
+                    for (List<Object> c : categoriasDrive) {
+                        for (Object t : c) {
                             mlist.add(t.toString());
                         }
                     }
@@ -113,7 +111,7 @@ private FragmentCategoriasBinding binding;
                     e.printStackTrace();
                 }
 
-                getActivity().runOnUiThread(()->{
+                getActivity().runOnUiThread(() -> {
                     mAdapter = new SimpleStringAdapter(this, mlist);
                     recyclerView.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
@@ -133,7 +131,7 @@ private FragmentCategoriasBinding binding;
         Sheets service = new Sheets.Builder(new NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
                 GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                .setApplicationName("Sheets samples")
+                .setApplicationName(getString(R.string.app_name))
                 .build();
         try {
             spreadsheet = service.spreadsheets().get(id).execute();
@@ -149,8 +147,8 @@ private FragmentCategoriasBinding binding;
         dimensionRange.setEndIndex(EndIndex);
 
         Sheet categoriasSheet = null;
-        for(Sheet s : spreadsheet.getSheets()){
-            if(s.getProperties().getTitle().equals("Categorias")){
+        for (Sheet s : spreadsheet.getSheets()) {
+            if (s.getProperties().getTitle().equals(getString(R.string.sheet_tab_category_name))) {
                 categoriasSheet = s;
                 break;
             }
@@ -164,14 +162,14 @@ private FragmentCategoriasBinding binding;
         requests.add(request);
         content.setRequests(requests);
 
-            service.spreadsheets().batchUpdate(id, content).execute();
+        service.spreadsheets().batchUpdate(id, content).execute();
 
     }
 
-    public void delete(int index){
+    public void delete(int index) {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
@@ -191,15 +189,15 @@ private FragmentCategoriasBinding binding;
         new Thread(() -> {
             try {
                 deleteRow(index, index + 1);
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
                 error.set(true);
             }
-            getActivity().runOnUiThread(()->{
+            getActivity().runOnUiThread(() -> {
                 progress.dismiss();
 
-                if(error.get()){
-                    Toast.makeText(getContext(), "Ocorreu um erro!",
+                if (error.get()) {
+                    Toast.makeText(getContext(), getString(R.string.global_error),
                             Toast.LENGTH_LONG).show();
                 }
                 load();
@@ -208,51 +206,48 @@ private FragmentCategoriasBinding binding;
 
     }
 
-    public void add(){
+    public void add() {
         AtomicBoolean error = new AtomicBoolean(false);
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         // 1. Instantiate an AlertDialog.Builder with its constructor
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         AlertDialog dialog;
         builder.setView(R.layout.add_spreadsheet);
-        builder.setTitle("Adicionar Categoria");
-        builder.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Dialog dialog2 = Dialog.class.cast(dialog);
-                EditText name = dialog2.findViewById(R.id.input_ss_name);
-                List<Object> cat = new ArrayList<>();
-                cat.add(name.getText().toString());
-                ValueRange insert = new ValueRange();
-                insert.setValues(Arrays.asList(cat));
-                insert.setRange("Categorias!A:A");
+        builder.setTitle(R.string.dialog_add_category_title);
+        builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
+            Dialog dialog2 = Dialog.class.cast(dialog1);
+            EditText name = dialog2.findViewById(R.id.input_ss_name);
+            List<Object> cat = new ArrayList<>();
+            cat.add(name.getText().toString());
+            ValueRange insert = new ValueRange();
+            insert.setValues(Arrays.asList(cat));
+            insert.setRange(getString(R.string.sheet_tab_category));
 
-                new Thread(() -> {
-                    try {
-                        Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                                GsonFactory.getDefaultInstance(),
-                                GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                                .setApplicationName("Sheets samples")
-                                .build();
-                        service.spreadsheets().values().append(id, "Categorias!A:A", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        error.set(true);
+            new Thread(() -> {
+                try {
+                    Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                            GsonFactory.getDefaultInstance(),
+                            GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
+                            .setApplicationName(getString(R.string.app_name))
+                            .build();
+                    service.spreadsheets().values().append(id, getString(R.string.sheet_tab_category), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    error.set(true);
+                }
+                getActivity().runOnUiThread(() -> {
+                    progress.dismiss();
+                    if (error.get()) {
+                        Toast.makeText(getContext(), getString(R.string.global_error),
+                                Toast.LENGTH_LONG).show();
                     }
-                    getActivity().runOnUiThread(()->{
-                        progress.dismiss();
-                        if(error.get()){
-                            Toast.makeText(getContext(), "Ocorreu um erro a enviar o convite!",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                        load();
-                    });
-                }).start();
-            }
+                    load();
+                });
+            }).start();
         });
-        builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.close_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -263,10 +258,9 @@ private FragmentCategoriasBinding binding;
         dialog.show();
 
 
-
     }
 
-@Override
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

@@ -48,7 +48,7 @@ public class SpreadSheetAdapter extends RecyclerView.Adapter<SpreadSheetAdapter.
         itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                removeFromSpreadSheet(name.getText().toString(),id.getText().toString());
+                removeFromSpreadSheet(name.getText().toString(), id.getText().toString());
                 return false;
             }
         });
@@ -76,26 +76,18 @@ public class SpreadSheetAdapter extends RecyclerView.Adapter<SpreadSheetAdapter.
         return spreadSheetList.size();
     }
 
-    public void removeFromSpreadSheet(final String name, final String id){
+    public void removeFromSpreadSheet(final String name, final String id) {
         // 1. Instantiate an AlertDialog.Builder with its constructor
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         AlertDialog dialog;
-        builder.setTitle("Remover Folha");
-        builder.setMessage("Queres eliminar a folha?");
-        builder.setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setTitle(R.string.dialog_delete_sheet_title);
+        builder.setMessage(R.string.dialog_delete_sheet_message);
+        builder.setPositiveButton(R.string.delete_button, (dialog1, which) -> {
 
-                Preferences.removeSpreadSheet(activity,id,name);
-                activity.loadSpreadSheatsList();
-            }
+            Preferences.removeSpreadSheet(activity, id, name);
+            activity.loadSpreadSheatsList();
         });
-        builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
 
         dialog = builder.create();
         dialog.show();

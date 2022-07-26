@@ -20,7 +20,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
     MovimentosFragment fragment;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView value, tipo, date, pessoa,descricao;
+        TextView value, tipo, date, pessoa, descricao;
 
         public MyViewHolder(View view) {
             super(view);
@@ -30,32 +30,18 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
             date = view.findViewById(R.id.date);
             descricao = view.findViewById(R.id.descricao);
 
-            view.setOnLongClickListener(new View.OnLongClickListener() {
+            view.setOnLongClickListener(v -> {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
+                AlertDialog dialog;
+                builder.setTitle(R.string.dialog_delete_entry_title);
+                builder.setMessage(R.string.dialog_delete_entry_message);
+                builder.setPositiveButton(R.string.delete_button, (dialog1, which) -> fragment.deleteMovimentoList(getAdapterPosition()));
+                builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
 
-                @Override
-                public boolean onLongClick(View v) {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
-                    AlertDialog dialog;
-                    builder.setTitle("Remover Movimento");
-                    builder.setMessage("Queres eliminar este movimento?");
-                    builder.setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            fragment.deleteMovimentoList(getAdapterPosition());
-                        }
-                    });
-                    builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                dialog = builder.create();
+                dialog.show();
 
-                    dialog = builder.create();
-                    dialog.show();
-
-                    return false;
-                }
+                return false;
             });
         }
     }
@@ -78,7 +64,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Movimento movie = movimentosList.get(position);
-        holder.value.setText(""+movie.getValor());
+        holder.value.setText("" + movie.getValor());
         holder.tipo.setText(movie.getTipo());
         holder.date.setText(movie.getData());
         holder.descricao.setText(movie.getDescricao());
@@ -87,7 +73,7 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
 
     @Override
     public int getItemCount() {
-        return movimentosList != null ? movimentosList.size(): 0;
+        return movimentosList != null ? movimentosList.size() : 0;
     }
 
 }

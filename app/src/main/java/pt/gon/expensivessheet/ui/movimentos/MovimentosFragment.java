@@ -2,7 +2,6 @@ package pt.gon.expensivessheet.ui.movimentos;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
@@ -57,8 +58,9 @@ public class MovimentosFragment extends Fragment {
 
     String id;
     Activity activity;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
-            ViewGroup container, Bundle savedInstanceState) {
+                             ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentMovimentosBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -67,17 +69,12 @@ public class MovimentosFragment extends Fragment {
 
         id = getActivity().getIntent().getExtras().getString("id");
 
-        FloatingActionButton fab = (FloatingActionButton) binding.fab;
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addMovimento();
-            }
-        });
+        FloatingActionButton fab = binding.fab;
+        fab.setOnClickListener(view -> addMovimento());
 
         recyclerView = binding.recyclerSpreedSheet;
 
-        mAdapter = new MovimentosAdapter( this, movimentoList);
+        mAdapter = new MovimentosAdapter(this, movimentoList);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -91,29 +88,30 @@ public class MovimentosFragment extends Fragment {
         loadMovimentosList();
     }
 
-    public void loadMovimentosList(){
+    public void loadMovimentosList() {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
         try {
 
             new Thread(() -> {
+                boolean error = false;
                 // do background stuff here
                 Sheets service = new Sheets.Builder(new NetHttpTransport(),
                         GsonFactory.getDefaultInstance(),
                         GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                        .setApplicationName("Sheets samples")
+                        .setApplicationName(getString(R.string.app_name))
                         .build();
 
                 List<List<Object>> movimentos = null;
                 try {
 
-                    movimentos = service.spreadsheets().values().get(id, "Movimentos!A:E").execute().getValues();
+                    movimentos = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_expensive_load)).execute().getValues();
                     movimentoList.clear();
-                    for (List<Object> movimento: movimentos) {
+                    for (List<Object> movimento : movimentos) {
                         Movimento m = new Movimento();
                         m.setData(movimento.get(0).toString());
                         m.setDescricao(movimento.get(1).toString());
@@ -127,12 +125,19 @@ public class MovimentosFragment extends Fragment {
                     Collections.reverse(movimentoList);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    error = true;
                 }
 
-                getActivity().runOnUiThread(()->{
-                    mAdapter = new MovimentosAdapter(this, movimentoList);
-                    recyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                boolean finalError = error;
+                getActivity().runOnUiThread(() -> {
+                    if(finalError){
+                        Toast.makeText(getContext(), getString(R.string.global_error),
+                                Toast.LENGTH_LONG).show();
+                    }else {
+                        mAdapter = new MovimentosAdapter(this, movimentoList);
+                        recyclerView.setAdapter(mAdapter);
+                        mAdapter.notifyDataSetChanged();
+                    }
                     progress.dismiss();
                     // OnPostExecute stuff here
                 });
@@ -140,16 +145,19 @@ public class MovimentosFragment extends Fragment {
 
         } catch (Exception e) {
             e.printStackTrace();
+            progress.dismiss();
+            Toast.makeText(getContext(), getString(R.string.global_error),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
-    public void deleteRow(Integer StartIndex, Integer EndIndex) {
+    public boolean deleteRow(Integer StartIndex, Integer EndIndex) {
         Spreadsheet spreadsheet = null;
 
         Sheets service = new Sheets.Builder(new NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
                 GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                .setApplicationName("Sheets samples")
+                .setApplicationName(getString(R.string.app_name))
                 .build();
         try {
             spreadsheet = service.spreadsheets().get(id).execute();
@@ -165,8 +173,8 @@ public class MovimentosFragment extends Fragment {
         dimensionRange.setEndIndex(EndIndex);
 
         Sheet sh = null;
-        for(Sheet s : spreadsheet.getSheets()){
-            if(s.getProperties().getTitle().equals("Movimentos")){
+        for (Sheet s : spreadsheet.getSheets()) {
+            if (s.getProperties().getTitle().equals(getString(R.string.sheet_tab_entry_name))) {
                 sh = s;
                 break;
             }
@@ -182,8 +190,9 @@ public class MovimentosFragment extends Fragment {
 
         try {
             service.spreadsheets().batchUpdate(id, content).execute();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            return false;
         } finally {
             dimensionRange = null;
             deleteDimensionRequest = null;
@@ -191,174 +200,168 @@ public class MovimentosFragment extends Fragment {
             requests = null;
             content = null;
         }
+        return true;
     }
 
-    public void deleteMovimentoList(int index){
+    public void deleteMovimentoList(int index) {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
 
         new Thread(() -> {
-           int indexFinal = movimentoList.size() - index;
+            int indexFinal = movimentoList.size() - index;
 
-            deleteRow(indexFinal, indexFinal+1);
-            getActivity().runOnUiThread(()->{
+           boolean success = deleteRow(indexFinal, indexFinal + 1);
+            getActivity().runOnUiThread(() -> {
                 progress.dismiss();
-                loadMovimentosList();
+                if(success) {
+                    loadMovimentosList();
+                }else{
+
+                }
             });
         }).start();
 
     }
 
-    public void addMovimento(){
+    public void addMovimento() {
         // 1. Instantiate an AlertDialog.Builder with its constructor
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle("A Carregar");
+        progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
 
-
-
         new Thread(() -> {
+            boolean error = false;
             // do background stuff here
             Sheets service = new Sheets.Builder(new NetHttpTransport(),
                     GsonFactory.getDefaultInstance(),
                     GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                    .setApplicationName("Sheets samples")
+                    .setApplicationName(getString(R.string.app_name))
                     .build();
-
 
 
             final List<String> pessoas = new ArrayList<>();
             final List<String> tipos = new ArrayList<>();
             try {
 
-                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, "Categorias!A:A").execute().getValues();
+                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_category)).execute().getValues();
 
-                for (List<Object> c: categoriasDrive) {
-                    for( Object t: c) {
+                for (List<Object> c : categoriasDrive) {
+                    for (Object t : c) {
                         tipos.add(t.toString());
                     }
                 }
 
-                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, "Pessoas!A:A").execute().getValues();
+                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_persons)).execute().getValues();
 
-                for (List<Object> c: pessoasDrive) {
-                    for( Object t: c) {
+                for (List<Object> c : pessoasDrive) {
+                    for (Object t : c) {
                         pessoas.add(t.toString());
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                error = true;
             }
 
-            getActivity().runOnUiThread(()->{
+            AtomicBoolean finalError = new AtomicBoolean(error);
+            getActivity().runOnUiThread(() -> {
                 progress.dismiss();
-                ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
-                ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
+                if(finalError.get()){
+                    Toast.makeText(getContext(), getString(R.string.global_error),
+                            Toast.LENGTH_LONG).show();
+                }else {
+                    ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
+                    ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
 
-                final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
-                final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_tipo);
-                tipo.setAdapter(adapterTipos);
+                    final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
+                    final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_tipo);
+                    tipo.setAdapter(adapterTipos);
 
-                final AppCompatSpinner pessoa = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_pessoa);
-                pessoa.setAdapter(adapterPessoas);
+                    final AppCompatSpinner pessoa = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_pessoa);
+                    pessoa.setAdapter(adapterPessoas);
 
 
-                final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
-                final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
+                    final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
+                    final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
 
-                final TextView date = addViewMovimento.findViewById(R.id.input_ss_date);
-                date.setText(Preferences.convertFromSimpleDate(new Date()));
+                    final TextView date = addViewMovimento.findViewById(R.id.input_ss_date);
+                    date.setText(Preferences.convertFromSimpleDate(new Date()));
 
-                final CalendarView simpleCalendarView = addViewMovimento.findViewById(R.id.calendarView); // get the reference of CalendarView
-                simpleCalendarView.setDate((new Date()).getTime());
-                simpleCalendarView.setOnDateChangeListener( new CalendarView.OnDateChangeListener() {
-                    public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                        Calendar calendar = new GregorianCalendar( year, month, dayOfMonth );
+                    final CalendarView simpleCalendarView = addViewMovimento.findViewById(R.id.calendarView); // get the reference of CalendarView
+                    simpleCalendarView.setDate((new Date()).getTime());
+                    simpleCalendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+                        Calendar calendar = new GregorianCalendar(year, month, dayOfMonth);
                         date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
-                    }
-                });
+                    });
 
-                final ViewGroup frm = addViewMovimento.findViewById(R.id.frm);
-                date.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        if(frm.getVisibility() == View.GONE)
+                    final ViewGroup frm = addViewMovimento.findViewById(R.id.frm);
+                    date.setOnClickListener(v -> {
+                        if (frm.getVisibility() == View.GONE)
                             frm.setVisibility(View.VISIBLE);
                         else
                             frm.setVisibility(View.GONE);
-                    }
-                });
+                    });
 
-                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                AlertDialog dialog;
-                builder.setView(addViewMovimento);
-                builder.setTitle("Adicionar Movimento");
-                builder.setPositiveButton("Adicionar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                    AlertDialog dialog;
+                    builder.setView(addViewMovimento);
+                    builder.setTitle(R.string.dialog_add_entry_title);
+                    builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
                         progress.show();
-                        Calendar now = Calendar.getInstance();
                         Calendar selected = Calendar.getInstance();
                         selected.setTime(Preferences.convertToSimpleDate(date.getText().toString()));
-
-                        Date dateToSend = selected.getTime();
-                        if(now.get(Calendar.DAY_OF_MONTH) == selected.get(Calendar.DAY_OF_MONTH) && now.get(Calendar.MONTH) == selected.get(Calendar.MONTH) && now.get(Calendar.YEAR) == selected.get(Calendar.YEAR)){
-                            dateToSend = new Date();
-                        }
 
                         List<Object> movimento = new ArrayList<>();
                         movimento.add(date.getText().toString());
                         movimento.add(descricao.getText().toString());
-                        Double valorDouble = Double.parseDouble(valor.getText().toString().trim().isEmpty() ? "0": valor.getText().toString().replace(".",","));
+                        Double valorDouble = Double.parseDouble(valor.getText().toString().trim().isEmpty() ? "0" : valor.getText().toString().replace(".", ","));
                         movimento.add(valorDouble);
                         movimento.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
                         movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
-                        movimento.add(""+selected.get(Calendar.MONTH +1));
-                        movimento.add(""+selected.get(Calendar.YEAR));
+                        movimento.add("" + selected.get(Calendar.MONTH + 1));
+                        movimento.add("" + selected.get(Calendar.YEAR));
 
                         ValueRange insert = new ValueRange();
                         insert.setValues(Arrays.asList(movimento));
-                        insert.setRange("Movimentos!A:G");
+                        insert.setRange(getString(R.string.sheet_tab_expensive_insert));
 
                         new Thread(() -> {
                             try {
-                                service.spreadsheets().values().append(id, "Movimentos!A:G", insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                                service.spreadsheets().values().append(id, getString(R.string.sheet_tab_expensive_insert), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
                             } catch (IOException e) {
                                 e.printStackTrace();
+                                finalError.set(true);
                             }
-                            getActivity().runOnUiThread(()->{
+                            getActivity().runOnUiThread(() -> {
                                 progress.dismiss();
-                                loadMovimentosList();
+                                if(finalError.get()){
+                                    Toast.makeText(getContext(), getString(R.string.global_error),
+                                            Toast.LENGTH_LONG).show();
+                                }else {
+                                    loadMovimentosList();
+                                }
                             });
                         }).start();
-                    }
-                });
-                builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                    });
+                    builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
 
-                dialog = builder.create();
-// 3. Get the AlertDialog from create()
-                dialog.show();
-                // OnPostExecute stuff here
+                    dialog = builder.create();
+                    dialog.show();
+                }
             });
         }).start();
 
     }
 
     @Override
-        public void onDestroyView() {
-            super.onDestroyView();
-            binding = null;
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

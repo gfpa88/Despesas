@@ -26,32 +26,18 @@ public class SimpleStringAdapter extends RecyclerView.Adapter<SimpleStringAdapte
             super(view);
             name = view.findViewById(R.id.name);
 
-            view.setOnLongClickListener(new View.OnLongClickListener() {
+            view.setOnLongClickListener(v -> {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
+                AlertDialog dialog;
+                builder.setTitle(R.string.dialog_delete_entry);
+                builder.setMessage(R.string.dialog_delete_entry_message);
+                builder.setPositiveButton(R.string.delete_button, (dialog1, which) -> fragment.delete(getAdapterPosition()));
+                builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
 
-                @Override
-                public boolean onLongClick(View v) {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
-                    AlertDialog dialog;
-                    builder.setTitle("Remover Movimento");
-                    builder.setMessage("Queres eliminar este movimento?");
-                    builder.setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            fragment.delete(getAdapterPosition());
-                        }
-                    });
-                    builder.setNegativeButton("Fechar", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                dialog = builder.create();
+                dialog.show();
 
-                    dialog = builder.create();
-                    dialog.show();
-
-                    return false;
-                }
+                return false;
             });
         }
     }
@@ -79,7 +65,7 @@ public class SimpleStringAdapter extends RecyclerView.Adapter<SimpleStringAdapte
 
     @Override
     public int getItemCount() {
-        return mList != null ? mList.size(): 0;
+        return mList != null ? mList.size() : 0;
     }
 
 }

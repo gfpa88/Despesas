@@ -27,7 +27,7 @@ import pt.gon.expensivessheet.databinding.ActivitySheetBinding;
 
 public class SheetActivity extends AppCompatActivity {
 
-private ActivitySheetBinding binding;
+    private ActivitySheetBinding binding;
 
     String id;
     String name;
@@ -36,8 +36,8 @@ private ActivitySheetBinding binding;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-     binding = ActivitySheetBinding.inflate(getLayoutInflater());
-     setContentView(binding.getRoot());
+        binding = ActivitySheetBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
 
         id = getIntent().getExtras().getString("id");
@@ -51,15 +51,16 @@ private ActivitySheetBinding binding;
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_movimentos,R.id.navigation_home, R.id.navigation_notifications)
+                R.id.navigation_movimentos, R.id.navigation_home, R.id.navigation_notifications)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_sheet);
 
-     //   NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        //   NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         NavigationUI.setupWithNavController(binding.navView, navController);
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -86,28 +87,28 @@ private ActivitySheetBinding binding;
     }
 
 
-    public void shareSheet(){
+    public void shareSheet() {
         // 1. Instantiate an AlertDialog.Builder with its constructor
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         AlertDialog dialog;
         builder.setView(R.layout.share_spreadsheet);
-        builder.setTitle("Partilhar folha");
-        builder.setPositiveButton("Partilhar", (dialog12, which) -> {
+        builder.setTitle(R.string.dialog_share_title);
+        builder.setPositiveButton(R.string.dialog_share_positive_button, (dialog12, which) -> {
             Dialog dialog2 = Dialog.class.cast(dialog12);
             EditText name = dialog2.findViewById(R.id.input_ss_name);
 
             shareSheetViaDrive(name.getText().toString());
         });
-        builder.setNegativeButton("Fechar", (dialog1, which) -> dialog1.dismiss());
+        builder.setNegativeButton(R.string.close_button, (dialog1, which) -> dialog1.dismiss());
 
         dialog = builder.create();
         dialog.show();
     }
 
-    public void shareSheetViaDrive(String email){
+    public void shareSheetViaDrive(String email) {
 
         final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("A partilhar");
+        progress.setTitle(getString(R.string.dialog_share_submit));
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
         AtomicBoolean error = new AtomicBoolean(false);
@@ -118,7 +119,7 @@ private ActivitySheetBinding binding;
                 Drive service = new Drive.Builder(new NetHttpTransport(),
                         GsonFactory.getDefaultInstance(),
                         GoogleCrendentialSingleton.getInstance().mGoogleAccountCredential)
-                        .setApplicationName("ExpensivesSheet")
+                        .setApplicationName(getString(R.string.app_name))
                         .build();
 
                 Permission userPermission = new Permission()
@@ -130,19 +131,19 @@ private ActivitySheetBinding binding;
                     service.permissions().create(id, userPermission)
                             .setFields("id").execute();
 
-                }catch (Exception e) {
+                } catch (Exception e) {
                     // TODO(developer) - handle error appropriately
                     e.printStackTrace();
                     error.set(true);
                 }
 
-                runOnUiThread(()->{
+                runOnUiThread(() -> {
                     progress.dismiss();
-                    if(error.get()){
-                        Toast.makeText(getApplicationContext(), "Ocorreu um erro a enviar o convite!",
+                    if (error.get()) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.error_share),
                                 Toast.LENGTH_LONG).show();
-                    }else {
-                        Toast.makeText(getApplicationContext(), "Convite enviado!",
+                    } else {
+                        Toast.makeText(getApplicationContext(), getString(R.string.sucess_share),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -150,6 +151,8 @@ private ActivitySheetBinding binding;
 
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(getApplicationContext(), getString(R.string.global_error),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
