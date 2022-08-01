@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import pt.gon.expensivessheet.databinding.ActivitySheetBinding;
 
-public class SheetActivity extends AppCompatActivity {
+public class SheetActivity extends BaseActivity {
 
     private ActivitySheetBinding binding;
 
@@ -33,9 +33,20 @@ public class SheetActivity extends AppCompatActivity {
     String name;
 
     @Override
+    void start() {
+        progress = new ProgressDialog(this);
+    }
+
+    @Override
+    void loginResult() {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        start();
         binding = ActivitySheetBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -43,7 +54,7 @@ public class SheetActivity extends AppCompatActivity {
         id = getIntent().getExtras().getString("id");
         name = getIntent().getExtras().getString("name");
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(name);
         setSupportActionBar(toolbar);
 
@@ -58,7 +69,6 @@ public class SheetActivity extends AppCompatActivity {
         //   NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         NavigationUI.setupWithNavController(binding.navView, navController);
-
     }
 
     @Override

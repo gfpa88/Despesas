@@ -133,6 +133,7 @@ public class MovimentosFragment extends Fragment {
                     if(finalError){
                         Toast.makeText(getContext(), getString(R.string.global_error),
                                 Toast.LENGTH_LONG).show();
+                        getActivity().finish();
                     }else {
                         mAdapter = new MovimentosAdapter(this, movimentoList);
                         recyclerView.setAdapter(mAdapter);
@@ -324,7 +325,7 @@ public class MovimentosFragment extends Fragment {
                         movimento.add(valorDouble);
                         movimento.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
                         movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
-                        movimento.add("" + selected.get(Calendar.MONTH + 1));
+                        movimento.add("" + (selected.get(Calendar.MONTH)+1));
                         movimento.add("" + selected.get(Calendar.YEAR));
 
                         ValueRange insert = new ValueRange();
