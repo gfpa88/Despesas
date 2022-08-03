@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#2196F3</color>
+    <color name="colorPrimary">#42A5F5</color>
+    <color name="colorPrimaryDark">#0D47A1</color>
+    <color name="colorAccent">#26C6DA</color>
     <color name="year">#999999</color>
     <color name="title">#222222</color>
     <color name="white">#ffffff</color>
-    <color name="purple_500">#311B92</color>
-    <color name="purple_200">#4FC3F7</color>
 </resources>

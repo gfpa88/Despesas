@@ -3,7 +3,21 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/drawable/card_background_selector.xml" value="0.1865" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/drawable/ic_baseline_share_24.xml" value="0.2365" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/activity_sheet.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/add_movimento.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/add_spreadsheet.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/content_main.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_categorias.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_movimentos.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_pessoas.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/help.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/line_divider.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/movimento_item.xml" value="0.268" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/share_spreadsheet.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/spreadsheet_item.xml" value="0.1" />
         <entry key="..\:/Users/Galberto/OneDrive - carris/Dados/Formacao/Android/Despesas/Despesas/app/src/main/res/drawable/ic_dashboard_black_24dp.xml" value="0.23854166666666668" />
         <entry key="..\:/Users/Galberto/OneDrive - carris/Dados/Formacao/Android/Despesas/Despesas/app/src/main/res/drawable/ic_launcher_background.xml" value="0.15885416666666666" />
         <entry key="..\:/Users/Galberto/OneDrive - carris/Dados/Formacao/Android/Despesas/Despesas/app/src/main/res/layout/activity_main.xml" value="0.264" />

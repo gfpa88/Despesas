@@ -4,8 +4,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
-import pt.gon.expensivessheet.ws.RetrofitClient;
-
 public class GoogleCrendentialSingleton {
 
     private static GoogleCrendentialSingleton instance;

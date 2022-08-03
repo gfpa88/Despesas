@@ -321,12 +321,12 @@ public class MovimentosFragment extends Fragment {
                         List<Object> movimento = new ArrayList<>();
                         movimento.add(date.getText().toString());
                         movimento.add(descricao.getText().toString());
-                        Double valorDouble = Double.parseDouble(valor.getText().toString().trim().isEmpty() ? "0" : valor.getText().toString().replace(".", ","));
+                        Double valorDouble = Double.parseDouble(valor.getText().toString());
                         movimento.add(valorDouble);
                         movimento.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
                         movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
-                        movimento.add("" + (selected.get(Calendar.MONTH)+1));
-                        movimento.add("" + selected.get(Calendar.YEAR));
+                        movimento.add(selected.get(Calendar.MONTH)+1);
+                        movimento.add(selected.get(Calendar.YEAR));
 
                         ValueRange insert = new ValueRange();
                         insert.setValues(Arrays.asList(movimento));
