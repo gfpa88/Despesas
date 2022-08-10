@@ -109,16 +109,6 @@ public class MainActivity extends BaseActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
 
-
-        DividerItemDecoration divider =
-                new DividerItemDecoration(recyclerView.getContext(),
-                        DividerItemDecoration.VERTICAL);
-
-        divider.setDrawable(ContextCompat.getDrawable(getBaseContext(),
-                R.drawable.line_divider));
-
-        recyclerView.addItemDecoration(divider);
-
         start();
 
 

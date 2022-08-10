@@ -18,8 +18,8 @@ android {
         applicationId 'pt.gon.expensivessheet'
         minSdkVersion 23
         targetSdkVersion 33
-        versionCode 8
-        versionName "1.0"
+        versionCode 9
+        versionName "1.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         signingConfig signingConfigs.config
     }

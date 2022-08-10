@@ -3,6 +3,7 @@ package pt.gon.expensivessheet.ui.movimentos;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -29,7 +30,14 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
             date = view.findViewById(R.id.date);
             descricao = view.findViewById(R.id.descricao);
 
-            view.setOnLongClickListener(v -> {
+            final ImageButton deleteButton = itemView.findViewById(R.id.delete_button);
+            final ImageButton editButton = itemView.findViewById(R.id.edit_button);
+
+            editButton.setOnClickListener(v -> {
+                fragment.editMovimento(getAdapterPosition(), movimentosList.get(getAdapterPosition()));
+            });
+
+            deleteButton.setOnClickListener(v -> {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getActivity());
                 AlertDialog dialog;
                 builder.setTitle(R.string.dialog_delete_entry_title);
@@ -39,8 +47,6 @@ public class MovimentosAdapter extends RecyclerView.Adapter<MovimentosAdapter.My
 
                 dialog = builder.create();
                 dialog.show();
-
-                return false;
             });
         }
     }

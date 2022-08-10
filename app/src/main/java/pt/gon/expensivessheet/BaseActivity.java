@@ -54,6 +54,20 @@ public abstract class BaseActivity extends AppCompatActivity {
                 success = false;
             }
             if (success) {
+                if (!Preferences.helpEditDelete(this)) {
+                    progress.dismiss();
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    AlertDialog dialog;
+                    builder.setView(R.layout.help_item_options);
+                    builder.setTitle(R.string.dialog_welcome_title);
+                    builder.setNeutralButton(R.string.close_button, (dialog1, which) -> {
+                        Preferences.saveHelpEditDelete(this, true);
+                        // finish();
+                    });
+
+                    dialog = builder.create();
+                    dialog.show();
+                }
                 loginResult();
             } else {
                 AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
@@ -115,6 +129,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         if (Preferences.loadAccount(this) == null && GoogleCrendentialSingleton.getInstance().account == null) {
             progress.dismiss();
+
             final AlertDialog.Builder builder = new AlertDialog.Builder(this);
             AlertDialog dialog;
             builder.setView(R.layout.help);
@@ -132,6 +147,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 Intent signInIntent = GoogleCrendentialSingleton.getInstance().mGoogleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, RC_SIGN_IN);
         }
+
+
     }
 
 }

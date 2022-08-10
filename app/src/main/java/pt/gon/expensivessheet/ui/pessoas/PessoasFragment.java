@@ -23,6 +23,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateValuesRequest;
+import com.google.api.services.sheets.v4.model.ClearValuesRequest;
 import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
 import com.google.api.services.sheets.v4.model.DimensionRange;
 import com.google.api.services.sheets.v4.model.Request;
@@ -72,14 +74,6 @@ public class PessoasFragment extends SheetFragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
 
-        DividerItemDecoration divider =
-                new DividerItemDecoration(recyclerView.getContext(),
-                        DividerItemDecoration.VERTICAL);
-
-        divider.setDrawable(ContextCompat.getDrawable(getContext(),
-                R.drawable.line_divider));
-
-        recyclerView.addItemDecoration(divider);
 
         return root;
     }
@@ -229,19 +223,77 @@ public class PessoasFragment extends SheetFragment {
 
     }
 
+    @Override
+    public void edit(int index, String value) {
+        final ProgressDialog progress = new ProgressDialog(getActivity());
+        progress.setTitle(R.string.dialog_loading);
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        // 1. Instantiate an AlertDialog.Builder with its constructor
+
+        final View editView = activity.getLayoutInflater().inflate(R.layout.add_spreadsheet, null);
+        EditText name = editView.findViewById(R.id.input_ss_name);
+        name.setText(value);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog dialog;
+        builder.setView(editView);
+        builder.setPositiveButton(R.string.confirm_button, (dialog1, which) -> {
+
+            String range = getString(R.string.sheet_tab_persons_name)+"!"+(index+1)+":"+(index+1);
+
+            List<Object> cat = new ArrayList<>();
+            cat.add(name.getText().toString());
+            ValueRange insert = new ValueRange();
+            insert.setValues(Arrays.asList(cat));
+            insert.setRange(range);
+
+            new Thread(() -> {
+                boolean error = false;
+                try {
+                    Sheets service = new Sheets.Builder(new NetHttpTransport(),
+                            GsonFactory.getDefaultInstance(),
+                            GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
+                            .setApplicationName(getString(R.string.app_name))
+                            .build();
+
+                    service.spreadsheets().values().update(id, range, insert).setValueInputOption("RAW").execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    error = true;
+                }
+                boolean finalError = error;
+                getActivity().runOnUiThread(() -> {
+                    progress.dismiss();
+                    if(finalError){
+                        Toast.makeText(getContext(), getString(R.string.global_error),
+                                Toast.LENGTH_LONG).show();
+                    }else{
+                        load();
+
+                    }
+                });
+            }).start();
+        });
+        builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
+
+        dialog = builder.create();
+        dialog.show();
+    }
+
     public void add() {
         final ProgressDialog progress = new ProgressDialog(getActivity());
         progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         // 1. Instantiate an AlertDialog.Builder with its constructor
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
         AlertDialog dialog;
         builder.setView(R.layout.add_spreadsheet);
         builder.setTitle(R.string.dialog_add_person_title);
         builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
             Dialog dialog2 = Dialog.class.cast(dialog1);
-            EditText name = dialog2.findViewById(R.id.input_ss_name);
             List<Object> cat = new ArrayList<>();
+            EditText name = dialog2.findViewById(R.id.input_ss_name);
             cat.add(name.getText().toString());
             ValueRange insert = new ValueRange();
             insert.setValues(Arrays.asList(cat));
@@ -277,7 +329,6 @@ public class PessoasFragment extends SheetFragment {
 
         dialog = builder.create();
         dialog.show();
-
 
     }
 

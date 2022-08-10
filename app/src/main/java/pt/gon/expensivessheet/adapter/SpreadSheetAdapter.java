@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -44,21 +45,19 @@ public class SpreadSheetAdapter extends RecyclerView.Adapter<SpreadSheetAdapter.
 
         final TextView name = itemView.findViewById(R.id.name);
         final TextView id = itemView.findViewById(R.id.id);
-        itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                removeFromSpreadSheet(name.getText().toString(), id.getText().toString());
-                return false;
-            }
+        final View mainView = itemView.findViewById(R.id.mainView);
+        final ImageButton deleteButton = itemView.findViewById(R.id.delete_button);
+        final ImageButton editButton = itemView.findViewById(R.id.edit_button);
+        editButton.setVisibility(View.GONE);
+        deleteButton.setOnClickListener(v -> {
+            removeFromSpreadSheet(name.getText().toString(), id.getText().toString());
         });
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(activity, SheetActivity.class);
-                i.putExtra("id", id.getText());
-                i.putExtra("name", name.getText());
-                activity.startActivity(i);
-            }
+
+        mainView.setOnClickListener(v -> {
+            Intent i = new Intent(activity, SheetActivity.class);
+            i.putExtra("id", id.getText());
+            i.putExtra("name", name.getText());
+            activity.startActivity(i);
         });
         return new MyViewHolder(itemView);
     }

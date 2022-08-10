@@ -71,6 +71,19 @@ public class Preferences {
         return prefs.getString("account",null);
     }
 
+    public static void saveHelpEditDelete(Activity context, Boolean state){
+
+        SharedPreferences prefs = context.getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor scoreEditor = prefs.edit();
+        scoreEditor.putBoolean("helpeditdel", state);
+        scoreEditor.commit();
+    }
+
+    public static Boolean helpEditDelete(Activity context){
+        SharedPreferences prefs = context.getPreferences(MODE_PRIVATE);
+        return prefs.getBoolean("helpeditdel",false);
+    }
+
     public static void cleanSpreadSheatsList(Activity context){
         SharedPreferences prefs = context.getPreferences(MODE_PRIVATE);
         Set<String> set = new HashSet<>();
