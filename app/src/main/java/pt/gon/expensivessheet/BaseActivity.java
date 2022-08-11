@@ -59,7 +59,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     AlertDialog dialog;
                     builder.setView(R.layout.help_item_options);
-                    builder.setTitle(R.string.dialog_welcome_title);
+                    builder.setTitle(R.string.dialog_welcome_tip);
                     builder.setNeutralButton(R.string.close_button, (dialog1, which) -> {
                         Preferences.saveHelpEditDelete(this, true);
                         // finish();

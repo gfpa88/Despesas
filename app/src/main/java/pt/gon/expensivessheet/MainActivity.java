@@ -141,7 +141,6 @@ public class MainActivity extends BaseActivity {
         dialog.show();
     }
 
-
     public void createNewSheetFromTemplate(String name) {
 
         AtomicBoolean error = new AtomicBoolean(false);
@@ -279,6 +278,7 @@ public class MainActivity extends BaseActivity {
     public void chooseSheetFromDrive(final List<File> files) {
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
         builderSingle.setTitle(R.string.dialog_import_sheet_title);
+        builderSingle.setNegativeButton(R.string.cancel_button,(dialogInterface, i) -> {});
 
         List<String> accountName = new ArrayList<>();
         for (File a :

@@ -3,6 +3,7 @@ package pt.gon.expensivessheet.ui.pessoas;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,21 +41,17 @@ import java.util.List;
 import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.SimpleStringAdapter;
+import pt.gon.expensivessheet.databinding.FragmentCategoriasBinding;
 import pt.gon.expensivessheet.databinding.FragmentPessoasBinding;
 import pt.gon.expensivessheet.ui.SheetFragment;
 
 public class PessoasFragment extends SheetFragment {
 
     private FragmentPessoasBinding binding;
-    private List<String> mlist = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private SimpleStringAdapter mAdapter;
-
-    String id;
-    Activity activity;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+
 
         binding = FragmentPessoasBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -63,8 +60,6 @@ public class PessoasFragment extends SheetFragment {
 
         id = getActivity().getIntent().getExtras().getString("id");
 
-        FloatingActionButton fab = binding.fab;
-        fab.setOnClickListener(view -> add());
 
         recyclerView = binding.recyclerSpreedSheet;
 
@@ -75,6 +70,37 @@ public class PessoasFragment extends SheetFragment {
         recyclerView.setAdapter(mAdapter);
 
 
+        FloatingActionButton fabExpand = binding.fabExpand;
+        FloatingActionButton fabSearch = binding.fabSearch;
+        FloatingActionButton fab = binding.fab;
+        fabExpand.setOnClickListener(view -> {
+            if (!floatExpanded) {
+                floatExpanded = true;
+                fabSearch.setVisibility(View.VISIBLE);
+                fab.setVisibility(View.VISIBLE);
+                fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimaryDark)));
+            } else {
+                floatExpanded = false;
+                fabSearch.setVisibility(View.GONE);
+                fab.setVisibility(View.GONE);
+                fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimary)));
+            }
+        });
+        fab.setOnClickListener(view -> {
+            floatExpanded = false;
+            fabSearch.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+            fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimary)));
+            add();
+        });
+        fabSearch.setOnClickListener(view -> {
+            floatExpanded = false;
+            fabSearch.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+            fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimary)));
+            importOptions();
+        });
+
         return root;
     }
 
@@ -84,252 +110,19 @@ public class PessoasFragment extends SheetFragment {
         load();
     }
 
-    public void load() {
-
-        final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle(R.string.dialog_loading);
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-        progress.show();
-
-        try {
-
-            new Thread(() -> {
-                boolean error = false;
-                // do background stuff here
-                Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                        .setApplicationName(getString(R.string.app_name))
-                        .build();
-
-                try {
-
-                    List<List<Object>> drive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_persons)).execute().getValues();
-                    mlist.clear();
-                    for (List<Object> c : drive) {
-                        for (Object t : c) {
-                            mlist.add(t.toString());
-                        }
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    error = true;
-                }
-
-                boolean finalError = error;
-                getActivity().runOnUiThread(() -> {
-                    if(finalError){
-                        Toast.makeText(getContext(), getString(R.string.global_error),
-                                Toast.LENGTH_LONG).show();
-                    }else {
-                        mAdapter = new SimpleStringAdapter(this, mlist);
-                        recyclerView.setAdapter(mAdapter);
-                        mAdapter.notifyDataSetChanged();
-                    }
-                    progress.dismiss();
-                    // OnPostExecute stuff here
-                });
-            }).start();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean deleteRow(Integer StartIndex, Integer EndIndex) {
-        Spreadsheet spreadsheet = null;
-
-        Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                .setApplicationName(getString(R.string.app_name))
-                .build();
-        try {
-            spreadsheet = service.spreadsheets().get(id).execute();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        BatchUpdateSpreadsheetRequest content = new BatchUpdateSpreadsheetRequest();
-        Request request = new Request();
-        DeleteDimensionRequest deleteDimensionRequest = new DeleteDimensionRequest();
-        DimensionRange dimensionRange = new DimensionRange();
-        dimensionRange.setDimension("ROWS");
-        dimensionRange.setStartIndex(StartIndex);
-        dimensionRange.setEndIndex(EndIndex);
-
-        Sheet sh = null;
-        for (Sheet s : spreadsheet.getSheets()) {
-            if (s.getProperties().getTitle().equals(getString(R.string.sheet_tab_persons_name))) {
-                sh = s;
-                break;
-            }
-        }
-        dimensionRange.setSheetId(sh.getProperties().getSheetId());
-        deleteDimensionRequest.setRange(dimensionRange);
-
-        request.setDeleteDimension(deleteDimensionRequest);
-
-        List<Request> requests = new ArrayList<Request>();
-        requests.add(request);
-        content.setRequests(requests);
-
-        try {
-            service.spreadsheets().batchUpdate(id, content).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            dimensionRange = null;
-            deleteDimensionRequest = null;
-            request = null;
-            requests = null;
-            content = null;
-        }
-        return true;
-    }
-
-    public void delete(int index) {
-
-        final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle(R.string.dialog_loading);
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-        progress.show();
-
-        Request request = new Request()
-                .setDeleteDimension(new DeleteDimensionRequest()
-                        .setRange(new DimensionRange()
-                                .setDimension("ROWS")
-                                .setStartIndex(index)
-                                .setEndIndex(index)
-                        )
-                );
-
-        List<Request> requests = new ArrayList<>();
-        requests.add(request);
-
-        new Thread(() -> {
-            boolean success = deleteRow(index, index + 1);
-            getActivity().runOnUiThread(() -> {
-                progress.dismiss();
-                if(!success){
-                    Toast.makeText(getContext(), getString(R.string.global_error),
-                            Toast.LENGTH_LONG).show();
-                }else {
-                    load();
-                }
-            });
-        }).start();
-
+    @Override
+    public String getSheetTab() {
+        return getString(R.string.sheet_tab_persons);
     }
 
     @Override
-    public void edit(int index, String value) {
-        final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle(R.string.dialog_loading);
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-        // 1. Instantiate an AlertDialog.Builder with its constructor
-
-        final View editView = activity.getLayoutInflater().inflate(R.layout.add_spreadsheet, null);
-        EditText name = editView.findViewById(R.id.input_ss_name);
-        name.setText(value);
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        AlertDialog dialog;
-        builder.setView(editView);
-        builder.setPositiveButton(R.string.confirm_button, (dialog1, which) -> {
-
-            String range = getString(R.string.sheet_tab_persons_name)+"!"+(index+1)+":"+(index+1);
-
-            List<Object> cat = new ArrayList<>();
-            cat.add(name.getText().toString());
-            ValueRange insert = new ValueRange();
-            insert.setValues(Arrays.asList(cat));
-            insert.setRange(range);
-
-            new Thread(() -> {
-                boolean error = false;
-                try {
-                    Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                            GsonFactory.getDefaultInstance(),
-                            GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                            .setApplicationName(getString(R.string.app_name))
-                            .build();
-
-                    service.spreadsheets().values().update(id, range, insert).setValueInputOption("RAW").execute();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    error = true;
-                }
-                boolean finalError = error;
-                getActivity().runOnUiThread(() -> {
-                    progress.dismiss();
-                    if(finalError){
-                        Toast.makeText(getContext(), getString(R.string.global_error),
-                                Toast.LENGTH_LONG).show();
-                    }else{
-                        load();
-
-                    }
-                });
-            }).start();
-        });
-        builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
-
-        dialog = builder.create();
-        dialog.show();
+    public String getTabName() {
+        return getString(R.string.sheet_tab_persons_name);
     }
 
-    public void add() {
-        final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle(R.string.dialog_loading);
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-        // 1. Instantiate an AlertDialog.Builder with its constructor
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        AlertDialog dialog;
-        builder.setView(R.layout.add_spreadsheet);
-        builder.setTitle(R.string.dialog_add_person_title);
-        builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
-            Dialog dialog2 = Dialog.class.cast(dialog1);
-            List<Object> cat = new ArrayList<>();
-            EditText name = dialog2.findViewById(R.id.input_ss_name);
-            cat.add(name.getText().toString());
-            ValueRange insert = new ValueRange();
-            insert.setValues(Arrays.asList(cat));
-            insert.setRange(getString(R.string.sheet_tab_persons));
-
-            new Thread(() -> {
-                boolean error = false;
-                try {
-                    Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                            GsonFactory.getDefaultInstance(),
-                            GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                            .setApplicationName(getString(R.string.app_name))
-                            .build();
-                    service.spreadsheets().values().append(id, getString(R.string.sheet_tab_persons), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    error = true;
-                }
-                boolean finalError = error;
-                getActivity().runOnUiThread(() -> {
-                    progress.dismiss();
-                    if(finalError){
-                        Toast.makeText(getContext(), getString(R.string.global_error),
-                                Toast.LENGTH_LONG).show();
-                    }else{
-                        load();
-
-                    }
-                });
-            }).start();
-        });
-        builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
-
-        dialog = builder.create();
-        dialog.show();
-
+    @Override
+    public String getAddTitleName() {
+        return getString(R.string.dialog_add_person_title);
     }
 
     @Override

@@ -3,6 +3,7 @@ package pt.gon.expensivessheet;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -64,7 +65,8 @@ public class SheetActivity extends BaseActivity {
                 R.id.navigation_movimentos, R.id.navigation_home, R.id.navigation_notifications)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_sheet);
-
+        int id=navController.getCurrentDestination().getId();
+        Log.i("AAAAAAAA", ""+id);
         //   NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         NavigationUI.setupWithNavController(binding.navView, navController);
