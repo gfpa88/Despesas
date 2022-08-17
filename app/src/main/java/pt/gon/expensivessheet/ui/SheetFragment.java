@@ -47,8 +47,8 @@ public abstract class SheetFragment extends Fragment {
 //    public abstract void delete(int index);
 //    public abstract void edit(int index, String value);
 
-    public abstract String getSheetTab();
-    public abstract String getTabName();
+    public abstract String getSheetTab(String lang);
+    public abstract String getTabName(String lang);
     public abstract String getAddTitleName();
 
     public List<String> mlist = new ArrayList<>();
@@ -57,9 +57,15 @@ public abstract class SheetFragment extends Fragment {
 
     public String id;
     public Activity activity;
+    public String lang;
 
     public boolean floatExpanded = false;
 
+
+    public void getLang(String fileId, Sheets service) throws IOException {
+        List<List<Object>> versionTab = service.spreadsheets().values().get(fileId, "Version!A1:A3").execute().getValues();
+        lang = versionTab.get(2).get(0).toString();
+    }
     public void load() {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
@@ -78,8 +84,11 @@ public abstract class SheetFragment extends Fragment {
                         .setApplicationName(getString(R.string.app_name))
                         .build();
 
+
                 try {
-                    List<List<Object>> drive = service.spreadsheets().values().get(id, getSheetTab()).execute().getValues();
+
+                    getLang(id, service);
+                    List<List<Object>> drive = service.spreadsheets().values().get(id, getSheetTab(lang)).execute().getValues();
                     mlist.clear();
                     for (List<Object> c : drive) {
                         for (Object t : c) {
@@ -128,7 +137,7 @@ public abstract class SheetFragment extends Fragment {
             cat.add(name.getText().toString());
             ValueRange insert = new ValueRange();
             insert.setValues(Arrays.asList(cat));
-            insert.setRange(getSheetTab());
+            insert.setRange(getSheetTab(lang));
 
             new Thread(() -> {
                 boolean error = false;
@@ -138,7 +147,7 @@ public abstract class SheetFragment extends Fragment {
                             GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
                             .setApplicationName(getString(R.string.app_name))
                             .build();
-                    service.spreadsheets().values().append(id, getSheetTab(), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                    service.spreadsheets().values().append(id, getSheetTab(lang), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
                 } catch (IOException e) {
                     e.printStackTrace();
                     error = true;
@@ -178,7 +187,7 @@ public abstract class SheetFragment extends Fragment {
         builder.setView(editView);
         builder.setPositiveButton(R.string.confirm_button, (dialog1, which) -> {
 
-            String range = getTabName()+"!"+(index+1)+":"+(index+1);
+            String range = getTabName(lang)+"!"+(index+1)+":"+(index+1);
 
             List<Object> cat = new ArrayList<>();
             cat.add(name.getText().toString());
@@ -276,7 +285,7 @@ public abstract class SheetFragment extends Fragment {
 
         Sheet sh = null;
         for (Sheet s : spreadsheet.getSheets()) {
-            if (s.getProperties().getTitle().equals(getTabName())) {
+            if (s.getProperties().getTitle().equals(getTabName(lang))) {
                 sh = s;
                 break;
             }
@@ -328,7 +337,7 @@ public abstract class SheetFragment extends Fragment {
                             //.setPageSize(100)
                             // Available Query parameters here:
                             //https://developers.google.com/drive/v3/web/search-parameters
-                            .setQ("mimeType = 'application/vnd.google-apps.spreadsheet' and (name contains 'Despesas' or name contains 'Expensives')   and trashed = false")
+                            .setQ("mimeType = 'application/vnd.google-apps.spreadsheet' and (name contains 'Despesa' or name contains 'Expense') and trashed = false")
                             .setFields("nextPageToken, files(id, name)");
 
                     FileList result = request.execute();
@@ -364,7 +373,9 @@ public abstract class SheetFragment extends Fragment {
         List<String> accountName = new ArrayList<>();
         for (File a :
                 files) {
-            accountName.add(a.getName());
+            if(!a.getId().equals(id)) {
+                accountName.add(a.getName());
+            }
         }
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.select_dialog_singlechoice, accountName);
 
@@ -398,14 +409,14 @@ public abstract class SheetFragment extends Fragment {
 
                 try {
 
-                    List<List<Object>> versionTab = service.spreadsheets().values().get(file.getId(), "Version!A1:A2").execute().getValues();
+                    List<List<Object>> versionTab = service.spreadsheets().values().get(file.getId(), "Version!A1:A3").execute().getValues();
                     String name = versionTab.get(0).get(0).toString();
-                    String version = versionTab.get(1).get(0).toString();
+                    String langFile = versionTab.get(2).get(0).toString();
                     if (!name.equals("expensivessheet")) {
                         error = true;
                     }else{
                         List<String> toImport = new ArrayList<>();
-                        List<List<Object>> drive = service.spreadsheets().values().get(file.getId(), getSheetTab()).execute().getValues();
+                        List<List<Object>> drive = service.spreadsheets().values().get(file.getId(), getSheetTab(langFile)).execute().getValues();
                         for (List<Object> c : drive) {
                             for (Object t : c) {
                                 if(!mlist.contains(t.toString())) {
@@ -424,8 +435,8 @@ public abstract class SheetFragment extends Fragment {
                             }
                             ValueRange insert = new ValueRange();
                             insert.setValues(finalImport);
-                            insert.setRange(getSheetTab());
-                            service.spreadsheets().values().append(id, getSheetTab(), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                            insert.setRange(getSheetTab(lang));
+                            service.spreadsheets().values().append(id, getSheetTab(lang), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
                         }
                     }
                 } catch (Exception e) {
@@ -442,12 +453,7 @@ public abstract class SheetFragment extends Fragment {
                         builderSingle.setTitle(R.string.error_invalid_sheet);
 
                         AlertDialog dialog;
-                        builderSingle.setNeutralButton(R.string.close_button, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
+                        builderSingle.setNeutralButton(R.string.close_button, (dialogInterface, i) -> dialogInterface.dismiss());
                         dialog = builderSingle.create();
                         dialog.show();
                     } else {

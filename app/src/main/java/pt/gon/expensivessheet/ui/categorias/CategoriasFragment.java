@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import pt.gon.expensivessheet.GoogleCrendentialSingleton;
@@ -47,6 +48,7 @@ import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.SimpleStringAdapter;
 import pt.gon.expensivessheet.databinding.FragmentCategoriasBinding;
 import pt.gon.expensivessheet.ui.SheetFragment;
+import pt.gon.expensivessheet.utils.Utils;
 
 public class CategoriasFragment extends SheetFragment {
 
@@ -110,13 +112,13 @@ public class CategoriasFragment extends SheetFragment {
 
 
     @Override
-    public String getSheetTab() {
-        return getString(R.string.sheet_tab_category);
+    public String getSheetTab(String lang) {
+        return Utils.getLocaleStringResource(Utils.getLocale(lang),R.string.sheet_tab_category,getContext());
     }
 
     @Override
-    public String getTabName() {
-        return getString(R.string.sheet_tab_category_name);
+    public String getTabName(String lang) {
+        return Utils.getLocaleStringResource(Utils.getLocale(lang),R.string.sheet_tab_category_name,getContext());
     }
 
     @Override

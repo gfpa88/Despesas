@@ -19,7 +19,7 @@
             android:id="@+id/input_ss_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nome" />
+            android:hint="@string/label_name" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

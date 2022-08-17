@@ -159,13 +159,12 @@ public class MainActivity extends BaseActivity {
                         .build();
 
 
-                // Upload file photo.jpg on drive.
                 File fileMetadata = new File();
-                fileMetadata.setName(name.contains("espesas") ? name : "Despesas_" + name);
+                fileMetadata.setName(name.contains("espesas") || name.contains("xpenses") ? name : getString(R.string.spreadsheet_default_name) + name);
                 File file = null;
                 try {
 
-                    file = driveService.files().copy("11e2kQPOZzim96wphESu3LaKAAoucuv6k5S_f3dQiJms", fileMetadata)
+                    file = driveService.files().copy(getString(R.string.spreadsheet_template_id), fileMetadata)
                             .setFields("id,name")
                             .execute();
 
@@ -244,7 +243,7 @@ public class MainActivity extends BaseActivity {
                             //.setPageSize(100)
                             // Available Query parameters here:
                             //https://developers.google.com/drive/v3/web/search-parameters
-                            .setQ("mimeType = 'application/vnd.google-apps.spreadsheet' and (name contains 'Despesas' or name contains 'Expensives')   and trashed = false")
+                            .setQ("mimeType = 'application/vnd.google-apps.spreadsheet' and (name contains 'Despesa' or name contains 'Expense') and trashed = false")
                             .setFields("nextPageToken, files(id, name)");
 
                     FileList result = request.execute();
@@ -317,7 +316,7 @@ public class MainActivity extends BaseActivity {
 
                 try {
 
-                    List<List<Object>> versionTab = service.spreadsheets().values().get(file.getId(), "Version!A1:A2").execute().getValues();
+                    List<List<Object>> versionTab = service.spreadsheets().values().get(file.getId(), "Version!A1:A3").execute().getValues();
                     String name = versionTab.get(0).get(0).toString();
                     String version = versionTab.get(1).get(0).toString();
                     if (!name.equals("expensivessheet")) {

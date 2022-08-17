@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal|numberSigned"
-            android:hint="Valor" />
+            android:hint="@string/label_value" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -38,7 +38,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tipo"
+            android:text="@string/label_category"
             style="@style/TextView.InputLabel"
             />
 
@@ -63,7 +63,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pessoa"
+            android:text="@string/label_person"
             style="@style/TextView.InputLabel"
             />
 
@@ -85,7 +85,7 @@
             android:id="@+id/input_ss_descricao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Descrição" />
+            android:hint="@string/label_description" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -102,7 +102,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Data"
+            android:text="@string/label_date"
             style="@style/TextView.InputLabel"
             />
 

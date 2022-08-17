@@ -51,6 +51,7 @@ import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.databinding.FragmentMovimentosBinding;
+import pt.gon.expensivessheet.utils.Utils;
 import pt.gon.expensivessheet.ws.model.Movimento;
 
 public class MovimentosFragment extends Fragment {
@@ -63,6 +64,7 @@ public class MovimentosFragment extends Fragment {
 
     String id;
     Activity activity;
+    String lang;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -95,6 +97,11 @@ public class MovimentosFragment extends Fragment {
         loadMovimentosList();
     }
 
+    public void getLang(String fileId, Sheets service) throws IOException {
+        List<List<Object>> versionTab = service.spreadsheets().values().get(fileId, "Version!A1:A3").execute().getValues();
+        lang = versionTab.get(2).get(0).toString();
+    }
+
     public void loadMovimentosList() {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
@@ -112,11 +119,11 @@ public class MovimentosFragment extends Fragment {
                         GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
                         .setApplicationName(getString(R.string.app_name))
                         .build();
-
                 List<List<Object>> movimentos = null;
                 try {
 
-                    movimentos = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_expensive_load)).execute().getValues();
+                    getLang(id,service);
+                    movimentos = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_expensive_load)).execute().getValues();
                     movimentoList.clear();
                     for (List<Object> movimento : movimentos) {
                         Movimento m = new Movimento();
@@ -182,7 +189,7 @@ public class MovimentosFragment extends Fragment {
 
         Sheet sh = null;
         for (Sheet s : spreadsheet.getSheets()) {
-            if (s.getProperties().getTitle().equals(getString(R.string.sheet_tab_entry_name))) {
+            if (s.getProperties().getTitle().equals(getLangString(R.string.sheet_tab_entry_name))) {
                 sh = s;
                 break;
             }
@@ -257,7 +264,7 @@ public class MovimentosFragment extends Fragment {
             final List<String> tipos = new ArrayList<>();
             try {
 
-                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_category)).execute().getValues();
+                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_category)).execute().getValues();
 
                 for (List<Object> c : categoriasDrive) {
                     for (Object t : c) {
@@ -265,7 +272,7 @@ public class MovimentosFragment extends Fragment {
                     }
                 }
 
-                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_persons)).execute().getValues();
+                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_persons)).execute().getValues();
 
                 for (List<Object> c : pessoasDrive) {
                     for (Object t : c) {
@@ -351,11 +358,11 @@ public class MovimentosFragment extends Fragment {
 
                         ValueRange insert = new ValueRange();
                         insert.setValues(Arrays.asList(movimento));
-                        insert.setRange(getString(R.string.sheet_tab_expensive_insert));
+                        insert.setRange(getLangString(R.string.sheet_tab_expensive_insert));
 
                         new Thread(() -> {
                             try {
-                                service.spreadsheets().values().append(id, getString(R.string.sheet_tab_expensive_insert), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                                service.spreadsheets().values().append(id, getLangString(R.string.sheet_tab_expensive_insert), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 finalError.set(true);
@@ -381,6 +388,11 @@ public class MovimentosFragment extends Fragment {
 
     }
 
+    @NonNull
+    private String getLangString(int string_id) {
+        return Utils.getLocaleStringResource(Utils.getLocale(lang),string_id,getContext());
+    }
+
 
     public void editMovimento(int index, Movimento movimento) {
         // 1. Instantiate an AlertDialog.Builder with its constructor
@@ -404,7 +416,7 @@ public class MovimentosFragment extends Fragment {
             final List<String> tipos = new ArrayList<>();
             try {
 
-                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_category)).execute().getValues();
+                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_category)).execute().getValues();
 
                 for (List<Object> c : categoriasDrive) {
                     for (Object t : c) {
@@ -412,7 +424,7 @@ public class MovimentosFragment extends Fragment {
                     }
                 }
 
-                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getString(R.string.sheet_tab_persons)).execute().getValues();
+                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_persons)).execute().getValues();
 
                 for (List<Object> c : pessoasDrive) {
                     for (Object t : c) {
@@ -515,7 +527,7 @@ public class MovimentosFragment extends Fragment {
                         movimentos.add(selected.get(Calendar.YEAR));
 
                         int indexFinal = movimentoList.size() - index;
-                        String range = getString(R.string.sheet_tab_entry_name)+"!A"+(indexFinal+1)+":G"+(indexFinal+1);
+                        String range = getLangString(R.string.sheet_tab_entry_name) +"!A"+(indexFinal+1)+":G"+(indexFinal+1);
 
 
                         ValueRange insert = new ValueRange();

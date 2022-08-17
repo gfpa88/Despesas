@@ -1,19 +1,18 @@
 <pt.gon.expensivessheet.layout.SwipeRevealLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="75dp"
+    android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
+    android:layout_margin="2dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:dragFromEdge="right">
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:gravity="center_vertical|end"
             android:paddingEnd="5dp"
+            android:paddingStart="5dp"
             android:orientation="horizontal">
 
             <ImageButton
@@ -34,20 +33,15 @@
                 android:text="Eliminar"/>
 
         </LinearLayout>
-    </FrameLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
         <com.google.android.material.card.MaterialCardView
             xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="match_parent"
             app:cardElevation="5dp"
             app:cardCornerRadius="8dp"
-            android:layout_margin="5dp"
             android:visibility="visible"
             android:clickable="true"
             android:focusable="true"
@@ -55,7 +49,7 @@
 
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:orientation="vertical"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -81,5 +75,4 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-    </FrameLayout>
 </pt.gon.expensivessheet.layout.SwipeRevealLayout>

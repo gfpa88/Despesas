@@ -44,6 +44,7 @@ import pt.gon.expensivessheet.adapter.SimpleStringAdapter;
 import pt.gon.expensivessheet.databinding.FragmentCategoriasBinding;
 import pt.gon.expensivessheet.databinding.FragmentPessoasBinding;
 import pt.gon.expensivessheet.ui.SheetFragment;
+import pt.gon.expensivessheet.utils.Utils;
 
 public class PessoasFragment extends SheetFragment {
 
@@ -111,13 +112,13 @@ public class PessoasFragment extends SheetFragment {
     }
 
     @Override
-    public String getSheetTab() {
-        return getString(R.string.sheet_tab_persons);
+    public String getSheetTab(String lang) {
+        return Utils.getLocaleStringResource(Utils.getLocale(lang),R.string.sheet_tab_persons,getContext());
     }
 
     @Override
-    public String getTabName() {
-        return getString(R.string.sheet_tab_persons_name);
+    public String getTabName(String lang) {
+        return Utils.getLocaleStringResource(Utils.getLocale(lang),R.string.sheet_tab_persons_name,getContext());
     }
 
     @Override
