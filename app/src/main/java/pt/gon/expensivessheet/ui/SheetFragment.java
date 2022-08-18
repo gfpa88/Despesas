@@ -371,16 +371,21 @@ public abstract class SheetFragment extends Fragment {
         builderSingle.setTitle(R.string.dialog_import_options_title);
         builderSingle.setNegativeButton(R.string.cancel_button,(dialogInterface, i) -> {});
         List<String> accountName = new ArrayList<>();
-        for (File a :
-                files) {
-            if(!a.getId().equals(id)) {
-                accountName.add(a.getName());
+        int ownIndex = -1;
+        for (int i = 0; i<files.size(); i++ ) {
+            if(!files.get(i).getId().equals(id)) {
+                accountName.add(files.get(i).getName());
+            }else{
+                ownIndex = i;
             }
         }
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.select_dialog_singlechoice, accountName);
 
+        int finalOwnIndex = ownIndex;
         builderSingle.setAdapter(arrayAdapter, (dialog, which) -> {
-
+            if(which >= finalOwnIndex){
+                which++;
+            }
             dialog.dismiss();
             validateFile(files.get(which));
 

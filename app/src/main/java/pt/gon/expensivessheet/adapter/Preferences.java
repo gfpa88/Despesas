@@ -92,19 +92,9 @@ public class Preferences {
         scoreEditor.commit();
     }
 
-    public static Date convertToDate(String dtStart){
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        try {
-            return format.parse(dtStart);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static String convertFromDate(Date date){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             return dateFormat.format(date);
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,22 +103,51 @@ public class Preferences {
     }
 
     public static String convertFromSimpleDate(Date date){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             return dateFormat.format(date);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
     public static Date convertToSimpleDate(String dtStart){
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            return format.parse(dtStart);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if(dtStart.trim().length()<=10){
+            dtStart += " 00:00:00";
         }
+        if(dtStart.indexOf("/") == 2){
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                return format.parse(dtStart);
+            } catch (ParseException es) {
+                es.printStackTrace();
+            }
+        }
+        if(dtStart.indexOf("/") == 4){
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                return format.parse(dtStart);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        if(dtStart.indexOf("-") == 4) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                return format.parse(dtStart);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            return format.parse(dtStart);
+        } catch (ParseException es) {
+            es.printStackTrace();
+        }
+
         return null;
     }
 }
