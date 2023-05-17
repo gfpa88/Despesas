@@ -12,13 +12,19 @@
         tools:layout="@layout/fragment_movimentos" />
 
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_analytics"
+        android:name="pt.gon.expensivessheet.ui.analytics.AnalyticsFragment"
+        android:label="@string/title_analytics"
+        tools:layout="@layout/fragment_analytics" />
+
+    <fragment
+        android:id="@+id/navigation_categories"
         android:name="pt.gon.expensivessheet.ui.categorias.CategoriasFragment"
         android:label="@string/title_categorias"
         tools:layout="@layout/fragment_categorias" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_persons"
         android:name="pt.gon.expensivessheet.ui.pessoas.PessoasFragment"
         android:label="@string/title_pessoas"
         tools:layout="@layout/fragment_pessoas" />

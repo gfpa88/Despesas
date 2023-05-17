@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-
     <item
         android:id="@+id/navigation_movimentos"
         android:icon="@drawable/ic_baseline_format_list_bulleted_24"
         android:title="@string/title_movimentos"/>
 
     <item
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_analytics"
+        android:icon="@drawable/ic_baseline_analytics_24"
+        android:title="@string/title_analytics"/>
+    <item
+        android:id="@+id/navigation_categories"
         android:icon="@drawable/ic_baseline_category_24"
         android:title="@string/title_categorias"/>
 
-
-
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_persons"
         android:icon="@drawable/ic_baseline_person_24"
         android:title="@string/title_pessoas"/>
 

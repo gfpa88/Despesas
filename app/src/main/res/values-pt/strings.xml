@@ -63,5 +63,11 @@
     <string name="label_settlement_section_receiver_person">Pessoa que Recebe</string>
     <string name="label_transaction_type_normal">Simples</string>
     <string name="label_transaction_type_settlement">Liquidação</string>
+    <string name="title_analytics">Analítica</string>
+    <string name="label_period">Periodo</string>
+    <string name="label_initial_date">Data Inicial</string>
+    <string name="label_final_date">Data Final</string>
+    <string name="label_filter">Filtro</string>
+    <string name="button_label_generate">Gerar</string>
 
 </resources>

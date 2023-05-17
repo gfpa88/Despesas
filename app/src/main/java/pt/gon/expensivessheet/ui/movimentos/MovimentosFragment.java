@@ -28,15 +28,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
-import com.google.api.services.sheets.v4.model.DeleteDimensionRequest;
-import com.google.api.services.sheets.v4.model.DimensionRange;
-import com.google.api.services.sheets.v4.model.Request;
-import com.google.api.services.sheets.v4.model.Sheet;
-import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -51,6 +44,7 @@ import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.databinding.FragmentMovimentosBinding;
 import pt.gon.expensivessheet.utils.Utils;
+import pt.gon.expensivessheet.ws.ApiService;
 import pt.gon.expensivessheet.ws.model.Movimento;
 
 public class MovimentosFragment extends Fragment {
@@ -97,9 +91,8 @@ public class MovimentosFragment extends Fragment {
         loadMovimentosList();
     }
 
-    public void postConfigure(String fileId, Sheets service) throws IOException {
-        List<List<Object>> versionTab = service.spreadsheets().values().get(fileId, "Version!A1:A3").execute().getValues();
-        lang = versionTab.get(2).get(0).toString();
+    public void postConfigure(String fileId) throws Exception {
+        lang = ApiService.getInstance().getConfiguration(fileId,getContext()).getLanguage();
         tiposMovimentos = Arrays.asList(getLangString(R.string.label_transaction_type_normal),getLangString(R.string.label_transaction_type_settlement));
     }
 
@@ -115,27 +108,11 @@ public class MovimentosFragment extends Fragment {
             new Thread(() -> {
                 boolean error = false;
                 // do background stuff here
-                Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                        .setApplicationName(getString(R.string.app_name))
-                        .build();
-                List<List<Object>> movimentos;
                 try {
 
-                    postConfigure(id,service);
-                    movimentos = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_expensive_load)).execute().getValues();
+                    postConfigure(id);
                     movimentoList.clear();
-                    for (List<Object> movimento : movimentos) {
-                        Movimento m = new Movimento();
-                        m.setData(movimento.get(0).toString());
-                        m.setDescricao(movimento.get(1).toString());
-                        m.setValor(movimento.get(2).toString());
-                        m.setTipo(movimento.get(3).toString());
-                        m.setPessoa(movimento.get(4).toString());
-
-                        movimentoList.add(m);
-                    }
+                    movimentoList.addAll(ApiService.getInstance().getTransactions(id,getLangString(R.string.sheet_tab_expensive_load),getContext()));
                     movimentoList.remove(0);
                     Collections.reverse(movimentoList);
                 } catch (Exception e) {
@@ -167,58 +144,6 @@ public class MovimentosFragment extends Fragment {
         }
     }
 
-    public boolean deleteRow(Integer StartIndex, Integer EndIndex) {
-        Spreadsheet spreadsheet = null;
-
-        Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                GsonFactory.getDefaultInstance(),
-                GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                .setApplicationName(getString(R.string.app_name))
-                .build();
-        try {
-            spreadsheet = service.spreadsheets().get(id).execute();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        BatchUpdateSpreadsheetRequest content = new BatchUpdateSpreadsheetRequest();
-        Request request = new Request();
-        DeleteDimensionRequest deleteDimensionRequest = new DeleteDimensionRequest();
-        DimensionRange dimensionRange = new DimensionRange();
-        dimensionRange.setDimension("ROWS");
-        dimensionRange.setStartIndex(StartIndex);
-        dimensionRange.setEndIndex(EndIndex);
-
-        Sheet sh = null;
-        for (Sheet s : spreadsheet.getSheets()) {
-            if (s.getProperties().getTitle().equals(getLangString(R.string.sheet_tab_entry_name))) {
-                sh = s;
-                break;
-            }
-        }
-        dimensionRange.setSheetId(sh.getProperties().getSheetId());
-        deleteDimensionRequest.setRange(dimensionRange);
-
-        request.setDeleteDimension(deleteDimensionRequest);
-
-        List<Request> requests = new ArrayList<Request>();
-        requests.add(request);
-        content.setRequests(requests);
-
-        try {
-            service.spreadsheets().batchUpdate(id, content).execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            dimensionRange = null;
-            deleteDimensionRequest = null;
-            request = null;
-            requests = null;
-            content = null;
-        }
-        return true;
-    }
-
     public void deleteMovimentoList(int index) {
 
         final ProgressDialog progress = new ProgressDialog(getActivity());
@@ -230,7 +155,8 @@ public class MovimentosFragment extends Fragment {
         new Thread(() -> {
             int indexFinal = movimentoList.size() - index;
 
-           boolean success = deleteRow(indexFinal, indexFinal + 1);
+            boolean success = ApiService.getInstance().deleteRow(id, getLangString(R.string.sheet_tab_entry_name),getContext(),indexFinal, indexFinal + 1);
+
             getActivity().runOnUiThread(() -> {
                 progress.dismiss();
                 if(success) {
@@ -253,46 +179,25 @@ public class MovimentosFragment extends Fragment {
 
         new Thread(() -> {
             boolean error = false;
-            // do background stuff here
-            Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                    .setApplicationName(getString(R.string.app_name))
-                    .build();
 
-            final List<String> pessoas = new ArrayList<>();
-            final List<String> categorias = new ArrayList<>();
             try {
 
-                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_category)).execute().getValues();
+                final List<String> pessoas = ApiService.getInstance().getPersonOrCategory(id, getLangString(R.string.sheet_tab_persons), getContext());
+                final List<String> categorias = ApiService.getInstance().getPersonOrCategory(id, getLangString(R.string.sheet_tab_category), getContext());
 
-                for (List<Object> c : categoriasDrive) {
-                    for (Object t : c) {
-                        categorias.add(t.toString());
-                    }
-                }
-
-                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_persons)).execute().getValues();
-
-                for (List<Object> c : pessoasDrive) {
-                    for (Object t : c) {
-                        pessoas.add(t.toString());
-                    }
-                }
+                AtomicBoolean finalError = new AtomicBoolean(error);
+                getActivity().runOnUiThread(() -> {
+                    insertTransaction(progress, pessoas, categorias, finalError);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
                 error = true;
             }
-
-            AtomicBoolean finalError = new AtomicBoolean(error);
-            getActivity().runOnUiThread(() -> {
-                insertTransaction(progress, service, pessoas, categorias, finalError);
-            });
         }).start();
 
     }
 
-    private void insertTransaction(ProgressDialog progress, Sheets service, List<String> pessoas, List<String> categorias, AtomicBoolean finalError) {
+    private void insertTransaction(ProgressDialog progress, List<String> pessoas, List<String> categorias, AtomicBoolean finalError) {
         progress.dismiss();
         if(finalError.get()){
             Toast.makeText(getContext(), getString(R.string.global_error),
@@ -387,18 +292,9 @@ public class MovimentosFragment extends Fragment {
 
                 new AlertDialog.Builder(activity)
                         .setView(calendar_layout)
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //do nothing...yet
-                            }
-                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        // Do nothing.
-                                    }
-                                }
-                        ).show();
-
-
+                        .setPositiveButton("Ok", (dialog, whichButton) -> {})
+                        .setNegativeButton("Cancel", (dialog, whichButton) -> {})
+                        .show();
             });
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -411,8 +307,7 @@ public class MovimentosFragment extends Fragment {
                 selected.setTime(Preferences.convertToSimpleDate(date.getText().toString()));
                 Double valorDouble = Double.parseDouble(valor.getText().toString());
 
-
-                ValueRange insert = new ValueRange();
+                List<List<Object>> values = null;
                 switch (tipo.getSelectedItemPosition()) {
                     case 0:
                         List<Object> movimento = new ArrayList<>();
@@ -424,8 +319,7 @@ public class MovimentosFragment extends Fragment {
                         movimento.add(selected.get(Calendar.MONTH)+1);
                         movimento.add(selected.get(Calendar.YEAR));
 
-                        insert.setValues(Arrays.asList(movimento));
-                        insert.setRange(getLangString(R.string.sheet_tab_expensive_insert));
+                        values = Arrays.asList(movimento);
                         break;
                     case 1:
                         List<Object> movimentoSender = new ArrayList<>();
@@ -446,15 +340,15 @@ public class MovimentosFragment extends Fragment {
                         movimentoReceiver.add(selected.get(Calendar.MONTH)+1);
                         movimentoReceiver.add(selected.get(Calendar.YEAR));
 
-                        insert.setValues(Arrays.asList(movimentoSender, movimentoReceiver));
-                        insert.setRange(getLangString(R.string.sheet_tab_expensive_insert));
+                        values = Arrays.asList(movimentoSender, movimentoReceiver);
                         break;
                 }
 
+                List<List<Object>> finalValues = values;
                 new Thread(() -> {
                     try {
-                        service.spreadsheets().values().append(id, getLangString(R.string.sheet_tab_expensive_insert), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
-                    } catch (IOException e) {
+                        ApiService.getInstance().addRow(id,getLangString(R.string.sheet_tab_expensive_insert), finalValues,getContext());
+                    } catch (Exception e) {
                         e.printStackTrace();
                         finalError.set(true);
                     }
@@ -479,6 +373,7 @@ public class MovimentosFragment extends Fragment {
     public void editMovimento(int index, Movimento movimento) {
         // 1. Instantiate an AlertDialog.Builder with its constructor
 
+
         final ProgressDialog progress = new ProgressDialog(getActivity());
         progress.setTitle(R.string.dialog_loading);
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
@@ -487,46 +382,30 @@ public class MovimentosFragment extends Fragment {
         new Thread(() -> {
             boolean error = false;
             // do background stuff here
-            Sheets service = new Sheets.Builder(new NetHttpTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
-                    .setApplicationName(getString(R.string.app_name))
-                    .build();
 
-
-            final List<String> pessoas = new ArrayList<>();
-            final List<String> tipos = new ArrayList<>();
+             List<String> pessoas = new ArrayList<>();
+             List<String> categorias = new ArrayList<>();
             try {
 
-                List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_category)).execute().getValues();
+                pessoas = ApiService.getInstance().getPersonOrCategory(id, getLangString(R.string.sheet_tab_persons), getContext());
+                categorias = ApiService.getInstance().getPersonOrCategory(id, getLangString(R.string.sheet_tab_category), getContext());
 
-                for (List<Object> c : categoriasDrive) {
-                    for (Object t : c) {
-                        tipos.add(t.toString());
-                    }
-                }
-
-                List<List<Object>> pessoasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_persons)).execute().getValues();
-
-                for (List<Object> c : pessoasDrive) {
-                    for (Object t : c) {
-                        pessoas.add(t.toString());
-                    }
-                }
             } catch (Exception e) {
                 e.printStackTrace();
                 error = true;
             }
 
             AtomicBoolean finalError = new AtomicBoolean(error);
+            List<String> finalCategorias = categorias;
+            List<String> finalPessoas = pessoas;
             getActivity().runOnUiThread(() -> {
                 progress.dismiss();
                 if(finalError.get()){
                     Toast.makeText(getContext(), getString(R.string.global_error),
                             Toast.LENGTH_LONG).show();
                 }else {
-                    ArrayAdapter adapterCategorias = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, tipos);
-                    ArrayAdapter adapterPessoas = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, pessoas);
+                    ArrayAdapter adapterCategorias = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, finalCategorias);
+                    ArrayAdapter adapterPessoas = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, finalPessoas);
 
                     final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
                     final View view_type = addViewMovimento.findViewById(R.id.view_type);
@@ -618,16 +497,11 @@ public class MovimentosFragment extends Fragment {
                         int indexFinal = movimentoList.size() - index;
                         String range = getLangString(R.string.sheet_tab_entry_name) +"!A"+(indexFinal+1)+":G"+(indexFinal+1);
 
-
-                        ValueRange insert = new ValueRange();
-                        insert.setValues(Arrays.asList(movimentos));
-                        insert.setRange(range);
-
                         new Thread(() -> {
                             try {
 
-                                service.spreadsheets().values().update(id, range, insert).setValueInputOption("RAW").execute();
-                            } catch (IOException e) {
+                                ApiService.getInstance().updateRow(id,range,Arrays.asList(movimentos),getContext());
+                            } catch (Exception e) {
                                 e.printStackTrace();
                                 finalError.set(true);
                             }

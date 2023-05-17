@@ -63,4 +63,11 @@
     <string name="label_settlement_section_receiver_person">Recipient</string>
     <string name="label_transaction_type_normal">Simple</string>
     <string name="label_transaction_type_settlement">Settlement</string>
+    <string name="title_analytics">Analytics</string>
+    <string name="label_period">Period</string>
+    <string name="label_initial_date">Initial Date</string>
+    <string name="label_final_date">Final Date</string>
+    <string name="label_filter">Filter</string>
+    <string name="button_label_generate">Generate</string>
+
 </resources>
