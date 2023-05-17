@@ -54,8 +54,13 @@
     <string name="spreadsheet_default_name">Expenses_</string>
     <string name="label_value">Value</string>
     <string name="label_person">Person</string>
-    <string name="label_category">Type</string>
+    <string name="label_category">Category</string>
     <string name="label_description">Description</string>
     <string name="label_date">Date</string>
     <string name="label_name">Name</string>
+    <string name="label_type">Type</string>
+    <string name="label_settlement_section_sender_person">Sender</string>
+    <string name="label_settlement_section_receiver_person">Recipient</string>
+    <string name="label_transaction_type_normal">Simple</string>
+    <string name="label_transaction_type_settlement">Settlement</string>
 </resources>

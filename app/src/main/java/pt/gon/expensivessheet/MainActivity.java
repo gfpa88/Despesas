@@ -72,31 +72,31 @@ public class MainActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         FloatingActionButton fabExpand = findViewById(R.id.fabExpand);
         FloatingActionButton fabSearch = findViewById(R.id.fabSearch);
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fabNewSheet = findViewById(R.id.fabNewSheet);
         fabExpand.setOnClickListener(view -> {
             if (!floatExpanded) {
                 floatExpanded = true;
                 fabSearch.setVisibility(View.VISIBLE);
-                fab.setVisibility(View.VISIBLE);
+                fabNewSheet.setVisibility(View.VISIBLE);
                 fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimaryDark)));
             } else {
                 floatExpanded = false;
                 fabSearch.setVisibility(View.GONE);
-                fab.setVisibility(View.GONE);
+                fabNewSheet.setVisibility(View.GONE);
                 fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimary)));
             }
         });
-        fab.setOnClickListener(view -> {
+        fabNewSheet.setOnClickListener(view -> {
             floatExpanded = false;
             fabSearch.setVisibility(View.GONE);
-            fab.setVisibility(View.GONE);
+            fabNewSheet.setVisibility(View.GONE);
             fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimary)));
             createNewSheet();
         });
         fabSearch.setOnClickListener(view -> {
             floatExpanded = false;
             fabSearch.setVisibility(View.GONE);
-            fab.setVisibility(View.GONE);
+            fabNewSheet.setVisibility(View.GONE);
             fabExpand.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.colorPrimary)));
             fetchSheetsFromDrive();
         });

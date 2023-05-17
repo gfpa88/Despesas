@@ -54,8 +54,14 @@
     <string name="spreadsheet_default_name">Despesas_</string>
     <string name="label_value">Valor</string>
     <string name="label_person">Pessoa</string>
-    <string name="label_category">Tipo</string>
+    <string name="label_category">Categoria</string>
     <string name="label_description">Descrição</string>
     <string name="label_date">Data</string>
     <string name="label_name">Nome</string>
+    <string name="label_type">Tipo</string>
+    <string name="label_settlement_section_sender_person">Pessoa que Envia</string>
+    <string name="label_settlement_section_receiver_person">Pessoa que Recebe</string>
+    <string name="label_transaction_type_normal">Simples</string>
+    <string name="label_transaction_type_settlement">Liquidação</string>
+
 </resources>

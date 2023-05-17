@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.EditText;
@@ -16,10 +17,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -58,6 +57,7 @@ public class MovimentosFragment extends Fragment {
 
     private FragmentMovimentosBinding binding;
 
+    private List<String> tiposMovimentos = new ArrayList<>();
     private List<Movimento> movimentoList = new ArrayList<>();
     private RecyclerView recyclerView;
     private MovimentosAdapter mAdapter;
@@ -97,9 +97,10 @@ public class MovimentosFragment extends Fragment {
         loadMovimentosList();
     }
 
-    public void getLang(String fileId, Sheets service) throws IOException {
+    public void postConfigure(String fileId, Sheets service) throws IOException {
         List<List<Object>> versionTab = service.spreadsheets().values().get(fileId, "Version!A1:A3").execute().getValues();
         lang = versionTab.get(2).get(0).toString();
+        tiposMovimentos = Arrays.asList(getLangString(R.string.label_transaction_type_normal),getLangString(R.string.label_transaction_type_settlement));
     }
 
     public void loadMovimentosList() {
@@ -119,10 +120,10 @@ public class MovimentosFragment extends Fragment {
                         GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
                         .setApplicationName(getString(R.string.app_name))
                         .build();
-                List<List<Object>> movimentos = null;
+                List<List<Object>> movimentos;
                 try {
 
-                    getLang(id,service);
+                    postConfigure(id,service);
                     movimentos = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_expensive_load)).execute().getValues();
                     movimentoList.clear();
                     for (List<Object> movimento : movimentos) {
@@ -259,16 +260,15 @@ public class MovimentosFragment extends Fragment {
                     .setApplicationName(getString(R.string.app_name))
                     .build();
 
-
             final List<String> pessoas = new ArrayList<>();
-            final List<String> tipos = new ArrayList<>();
+            final List<String> categorias = new ArrayList<>();
             try {
 
                 List<List<Object>> categoriasDrive = service.spreadsheets().values().get(id, getLangString(R.string.sheet_tab_category)).execute().getValues();
 
                 for (List<Object> c : categoriasDrive) {
                     for (Object t : c) {
-                        tipos.add(t.toString());
+                        categorias.add(t.toString());
                     }
                 }
 
@@ -286,113 +286,195 @@ public class MovimentosFragment extends Fragment {
 
             AtomicBoolean finalError = new AtomicBoolean(error);
             getActivity().runOnUiThread(() -> {
-                progress.dismiss();
-                if(finalError.get()){
-                    Toast.makeText(getContext(), getString(R.string.global_error),
-                            Toast.LENGTH_LONG).show();
-                }else {
-                    ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
-                    ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
-
-                    final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
-                    final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_tipo);
-                    tipo.setAdapter(adapterTipos);
-
-                    final AppCompatSpinner pessoa = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_pessoa);
-                    pessoa.setAdapter(adapterPessoas);
-
-
-                    final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
-                    final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
-
-                    final TextView date = addViewMovimento.findViewById(R.id.input_ss_date);
-                    date.setText(Preferences.convertFromSimpleDate(new Date()));
-
-                    date.setOnClickListener(v -> {
-
-                        LayoutInflater inflater = (LayoutInflater)activity.getApplicationContext().getSystemService
-                                (Context.LAYOUT_INFLATER_SERVICE);
-                        LinearLayout calendar_layout= (LinearLayout)inflater.inflate(R.layout.calendar_layout, null, false);
-
-                        final CalendarView simpleCalendarView = calendar_layout.findViewById(R.id.calendarView); // get the reference of CalendarView
-                        simpleCalendarView.setDate((new Date()).getTime());
-                        simpleCalendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-                            Calendar calendar = new GregorianCalendar(year, month, dayOfMonth);
-                            date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
-                        });
-
-                        new AlertDialog.Builder(activity)
-                                .setView(calendar_layout)
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        //do nothing...yet
-                                    }
-                                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int whichButton) {
-                                                // Do nothing.
-                                            }
-                                        }
-                                ).show();
-
-
-                    });
-
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                    AlertDialog dialog;
-                    builder.setView(addViewMovimento);
-                    builder.setTitle(R.string.dialog_add_entry_title);
-                    builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
-                        progress.show();
-                        Calendar selected = Calendar.getInstance();
-                        selected.setTime(Preferences.convertToSimpleDate(date.getText().toString()));
-
-                        List<Object> movimento = new ArrayList<>();
-                        movimento.add(date.getText().toString());
-                        movimento.add(descricao.getText().toString());
-                        Double valorDouble = Double.parseDouble(valor.getText().toString());
-                        movimento.add(valorDouble);
-                        movimento.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
-                        movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
-                        movimento.add(selected.get(Calendar.MONTH)+1);
-                        movimento.add(selected.get(Calendar.YEAR));
-
-                        ValueRange insert = new ValueRange();
-                        insert.setValues(Arrays.asList(movimento));
-                        insert.setRange(getLangString(R.string.sheet_tab_expensive_insert));
-
-                        new Thread(() -> {
-                            try {
-                                service.spreadsheets().values().append(id, getLangString(R.string.sheet_tab_expensive_insert), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                finalError.set(true);
-                            }
-                            getActivity().runOnUiThread(() -> {
-                                progress.dismiss();
-                                if(finalError.get()){
-                                    Toast.makeText(getContext(), getString(R.string.global_error),
-                                            Toast.LENGTH_LONG).show();
-                                }else {
-                                    loadMovimentosList();
-                                }
-                            });
-                        }).start();
-                    });
-                    builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
-
-                    dialog = builder.create();
-                    dialog.show();
-                }
+                insertTransaction(progress, service, pessoas, categorias, finalError);
             });
         }).start();
 
     }
 
-    @NonNull
-    private String getLangString(int string_id) {
-        return Utils.getLocaleStringResource(Utils.getLocale(lang),string_id,getContext());
-    }
+    private void insertTransaction(ProgressDialog progress, Sheets service, List<String> pessoas, List<String> categorias, AtomicBoolean finalError) {
+        progress.dismiss();
+        if(finalError.get()){
+            Toast.makeText(getContext(), getString(R.string.global_error),
+                    Toast.LENGTH_LONG).show();
+        }else {
 
+            final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
+            final View view_type = addViewMovimento.findViewById(R.id.view_type);
+            final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_type);
+            View section_normal = addViewMovimento.findViewById(R.id.section_normal);
+            View section_settlement = addViewMovimento.findViewById(R.id.section_settlement);
+            section_normal.setVisibility(View.VISIBLE);
+            section_settlement.setVisibility(View.GONE);
+
+            /*
+            Normal Section
+             */
+            ArrayAdapter adapterCategorias = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, categorias);
+            ArrayAdapter adapterPessoas = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, pessoas);
+
+            final AppCompatSpinner categoria = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_category);
+            categoria.setAdapter(adapterCategorias);
+            final AppCompatSpinner pessoa = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_pessoa);
+            pessoa.setAdapter(adapterPessoas);
+
+            /*
+            Settlement Section
+             */
+            ArrayAdapter adapterTipos = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, tiposMovimentos);
+            tipo.setAdapter(adapterTipos);
+            tipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    switch (position) {
+                        case 0:
+                            section_normal.setVisibility(View.VISIBLE);
+                            section_settlement.setVisibility(View.GONE);
+                            break;
+                        case 1:
+                            section_normal.setVisibility(View.GONE);
+                            section_settlement.setVisibility(View.VISIBLE);
+                            break;
+                        default:
+                            section_normal.setVisibility(View.VISIBLE);
+                            section_settlement.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                }
+            });
+
+            ArrayAdapter adapterCategoriasSender = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, categorias);
+            ArrayAdapter adapterPessoasSender = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, pessoas);
+            ArrayAdapter adapterCategoriasReceiver = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, categorias);
+            ArrayAdapter adapterPessoasReceiver = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, pessoas);
+
+            final AppCompatSpinner categoriaSender = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_settlement_sender_category);
+            categoriaSender.setAdapter(adapterCategoriasSender);
+            final AppCompatSpinner pessoaSender = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_settlement_sender_person);
+            pessoaSender.setAdapter(adapterPessoasSender);
+            final AppCompatSpinner categoriaReceiver = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_settlement_receiver_category);
+            categoriaReceiver.setAdapter(adapterCategoriasReceiver);
+            final AppCompatSpinner pessoaReceiver = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_settlement_receiver_person);
+            pessoaReceiver.setAdapter(adapterPessoasReceiver);
+            if(pessoas.size() <= 1){
+                view_type.setVisibility(View.GONE);
+            }else{
+                pessoaReceiver.setSelection(1);
+            }
+
+
+            final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
+            final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
+
+            final TextView date = addViewMovimento.findViewById(R.id.input_ss_date);
+            date.setText(Preferences.convertFromSimpleDate(new Date()));
+
+            date.setOnClickListener(v -> {
+
+                LayoutInflater inflater = (LayoutInflater)activity.getApplicationContext().getSystemService
+                        (Context.LAYOUT_INFLATER_SERVICE);
+                LinearLayout calendar_layout= (LinearLayout)inflater.inflate(R.layout.calendar_layout, null, false);
+
+                final CalendarView simpleCalendarView = calendar_layout.findViewById(R.id.calendarView); // get the reference of CalendarView
+                simpleCalendarView.setDate((new Date()).getTime());
+                simpleCalendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+                    Calendar calendar = new GregorianCalendar(year, month, dayOfMonth);
+                    date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
+                });
+
+                new AlertDialog.Builder(activity)
+                        .setView(calendar_layout)
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //do nothing...yet
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        // Do nothing.
+                                    }
+                                }
+                        ).show();
+
+
+            });
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            AlertDialog dialog;
+            builder.setView(addViewMovimento);
+            builder.setTitle(R.string.dialog_add_entry_title);
+            builder.setPositiveButton(R.string.add_button, (dialog1, which) -> {
+                progress.show();
+                Calendar selected = Calendar.getInstance();
+                selected.setTime(Preferences.convertToSimpleDate(date.getText().toString()));
+                Double valorDouble = Double.parseDouble(valor.getText().toString());
+
+
+                ValueRange insert = new ValueRange();
+                switch (tipo.getSelectedItemPosition()) {
+                    case 0:
+                        List<Object> movimento = new ArrayList<>();
+                        movimento.add(date.getText().toString());
+                        movimento.add(descricao.getText().toString().trim());
+                        movimento.add(valorDouble);
+                        movimento.add(categoria.getItemAtPosition(categoria.getSelectedItemPosition()).toString());
+                        movimento.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
+                        movimento.add(selected.get(Calendar.MONTH)+1);
+                        movimento.add(selected.get(Calendar.YEAR));
+
+                        insert.setValues(Arrays.asList(movimento));
+                        insert.setRange(getLangString(R.string.sheet_tab_expensive_insert));
+                        break;
+                    case 1:
+                        List<Object> movimentoSender = new ArrayList<>();
+                        movimentoSender.add(date.getText().toString());
+                        movimentoSender.add(descricao.getText().toString().trim());
+                        movimentoSender.add(valorDouble);
+                        movimentoSender.add(categoriaSender.getItemAtPosition(categoriaSender.getSelectedItemPosition()).toString());
+                        movimentoSender.add(pessoaSender.getItemAtPosition(pessoaSender.getSelectedItemPosition()).toString());
+                        movimentoSender.add(selected.get(Calendar.MONTH)+1);
+                        movimentoSender.add(selected.get(Calendar.YEAR));
+
+                        List<Object> movimentoReceiver = new ArrayList<>();
+                        movimentoReceiver.add(date.getText().toString());
+                        movimentoReceiver.add(descricao.getText().toString().trim());
+                        movimentoReceiver.add(0-valorDouble);
+                        movimentoReceiver.add(categoriaReceiver.getItemAtPosition(categoriaReceiver.getSelectedItemPosition()).toString());
+                        movimentoReceiver.add(pessoaReceiver.getItemAtPosition(pessoaReceiver.getSelectedItemPosition()).toString());
+                        movimentoReceiver.add(selected.get(Calendar.MONTH)+1);
+                        movimentoReceiver.add(selected.get(Calendar.YEAR));
+
+                        insert.setValues(Arrays.asList(movimentoSender, movimentoReceiver));
+                        insert.setRange(getLangString(R.string.sheet_tab_expensive_insert));
+                        break;
+                }
+
+                new Thread(() -> {
+                    try {
+                        service.spreadsheets().values().append(id, getLangString(R.string.sheet_tab_expensive_insert), insert).setValueInputOption("RAW").setInsertDataOption("INSERT_ROWS").execute();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        finalError.set(true);
+                    }
+                    getActivity().runOnUiThread(() -> {
+                        progress.dismiss();
+                        if(finalError.get()){
+                            Toast.makeText(getContext(), getString(R.string.global_error),
+                                    Toast.LENGTH_LONG).show();
+                        }else {
+                            loadMovimentosList();
+                        }
+                    });
+                }).start();
+            });
+            builder.setNegativeButton(R.string.close_button, (dialog12, which) -> dialog12.dismiss());
+
+            dialog = builder.create();
+            dialog.show();
+        }
+    }
 
     public void editMovimento(int index, Movimento movimento) {
         // 1. Instantiate an AlertDialog.Builder with its constructor
@@ -443,13 +525,22 @@ public class MovimentosFragment extends Fragment {
                     Toast.makeText(getContext(), getString(R.string.global_error),
                             Toast.LENGTH_LONG).show();
                 }else {
-                    ArrayAdapter adapterTipos = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, tipos);
-                    ArrayAdapter adapterPessoas = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, pessoas);
+                    ArrayAdapter adapterCategorias = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, tipos);
+                    ArrayAdapter adapterPessoas = new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, pessoas);
 
                     final View addViewMovimento = activity.getLayoutInflater().inflate(R.layout.add_movimento, null);
-                    final AppCompatSpinner tipo = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_tipo);
-                    tipo.setAdapter(adapterTipos);
-                    tipo.setSelection(adapterTipos.getPosition(movimento.getTipo()));
+                    final View view_type = addViewMovimento.findViewById(R.id.view_type);
+
+                    View section_normal = addViewMovimento.findViewById(R.id.section_normal);
+                    View section_settlement = addViewMovimento.findViewById(R.id.section_settlement);
+
+                    view_type.setVisibility(View.GONE);
+                    section_normal.setVisibility(View.VISIBLE);
+                    section_settlement.setVisibility(View.GONE);
+
+                    final AppCompatSpinner categoria = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_category);
+                    categoria.setAdapter(adapterCategorias);
+                    categoria.setSelection(adapterCategorias.getPosition(movimento.getTipo()));
 
                     final AppCompatSpinner pessoa = (AppCompatSpinner) addViewMovimento.findViewById(R.id.input_ss_pessoa);
                     pessoa.setAdapter(adapterPessoas);
@@ -457,8 +548,8 @@ public class MovimentosFragment extends Fragment {
 
                     final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
                     try{
-                       Double val =  Double.parseDouble(movimento.getValor());
-                       valor.setText(val.toString());
+                        Double val =  Double.parseDouble(movimento.getValor());
+                        valor.setText(val.toString());
                     }catch (Exception e){
                         try{
                             Double val =  Double.parseDouble(movimento.getValor().replace(",","."));
@@ -471,8 +562,6 @@ public class MovimentosFragment extends Fragment {
                             }
                         }
                     }
-
-
 
                     final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
                     descricao.setText(movimento.getDescricao());
@@ -521,7 +610,7 @@ public class MovimentosFragment extends Fragment {
                         movimentos.add(descricao.getText().toString());
                         Double valorDouble = Double.parseDouble(valor.getText().toString());
                         movimentos.add(valorDouble);
-                        movimentos.add(tipo.getItemAtPosition(tipo.getSelectedItemPosition()).toString());
+                        movimentos.add(categoria.getItemAtPosition(categoria.getSelectedItemPosition()).toString());
                         movimentos.add(pessoa.getItemAtPosition(pessoa.getSelectedItemPosition()).toString());
                         movimentos.add(selected.get(Calendar.MONTH)+1);
                         movimentos.add(selected.get(Calendar.YEAR));
@@ -562,6 +651,12 @@ public class MovimentosFragment extends Fragment {
         }).start();
 
     }
+
+    @NonNull
+    private String getLangString(int string_id) {
+        return Utils.getLocaleStringResource(Utils.getLocale(lang),string_id,getContext());
+    }
+
 
     @Override
     public void onDestroyView() {
