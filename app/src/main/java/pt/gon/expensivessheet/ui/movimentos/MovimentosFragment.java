@@ -25,10 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.ValueRange;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +35,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import pt.gon.expensivessheet.GoogleCrendentialSingleton;
 import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.databinding.FragmentMovimentosBinding;
@@ -113,7 +108,7 @@ public class MovimentosFragment extends Fragment {
                     postConfigure(id);
                     movimentoList.clear();
                     movimentoList.addAll(ApiService.getInstance().getTransactions(id,getLangString(R.string.sheet_tab_expensive_load),getContext()));
-                    movimentoList.remove(0);
+
                     Collections.reverse(movimentoList);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -275,7 +270,7 @@ public class MovimentosFragment extends Fragment {
             final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
 
             final TextView date = addViewMovimento.findViewById(R.id.input_ss_date);
-            date.setText(Preferences.convertFromSimpleDate(new Date()));
+            date.setText(Preferences.convertFromSimpleDateTime(new Date()));
 
             date.setOnClickListener(v -> {
 
@@ -287,7 +282,7 @@ public class MovimentosFragment extends Fragment {
                 simpleCalendarView.setDate((new Date()).getTime());
                 simpleCalendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
                     Calendar calendar = new GregorianCalendar(year, month, dayOfMonth);
-                    date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
+                    date.setText(Preferences.convertFromSimpleDateTime(calendar.getTime()));
                 });
 
                 new AlertDialog.Builder(activity)
@@ -457,7 +452,7 @@ public class MovimentosFragment extends Fragment {
                         simpleCalendarView.setDate((Preferences.convertToSimpleDate(movimento.getData())).getTime());
                         simpleCalendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
                             Calendar calendar = new GregorianCalendar(year, month, dayOfMonth);
-                            date.setText(Preferences.convertFromSimpleDate(calendar.getTime()));
+                            date.setText(Preferences.convertFromSimpleDateTime(calendar.getTime()));
                         });
 
                         new AlertDialog.Builder(activity)

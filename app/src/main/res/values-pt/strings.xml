@@ -3,7 +3,7 @@
     <string name="sheet_tab_persons">Pessoas!A:A</string>
     <string name="sheet_tab_category">Categorias!A:A</string>
     <string name="sheet_tab_expensive_insert">Movimentos!A:G</string>
-    <string name="sheet_tab_expensive_load">Movimentos!A:E</string>
+    <string name="sheet_tab_expensive_load">Movimentos!A:G</string>
     <string name="sheet_tab_category_name">Categorias</string>
     <string name="sheet_tab_entry_name">Movimentos</string>
     <string name="sheet_tab_persons_name">Pessoas</string>
@@ -69,5 +69,9 @@
     <string name="label_final_date">Data Final</string>
     <string name="label_filter">Filtro</string>
     <string name="button_label_generate">Gerar</string>
+    <string name="period_year">Ano</string>
+    <string name="period_interval">Intervalo</string>
+    <string name="period_complete">Completo</string>
+    <string name="period_month">Mês</string>
 
 </resources>

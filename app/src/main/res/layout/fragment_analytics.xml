@@ -17,15 +17,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:focusable="false"
-            android:visibility="visible"
-            android:layout_margin="4dp"
-            app:contentPadding="4dp">
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,7 +43,16 @@
                         android:spinnerMode="dialog" />
                 </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/periodValueLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:orientation="horizontal">
                 <LinearLayout
+                    android:id="@+id/periodYearLayout"
+                    android:layout_weight="1"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -62,21 +62,45 @@
                         style="@style/TextView.InputLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text="2023" />
+                        android:text="@string/period_year" />
 
                     <androidx.appcompat.widget.AppCompatSpinner
-                        android:id="@+id/input_period_value"
+                        android:id="@+id/input_period_year"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:spinnerMode="dialog" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/periodMonthLayout"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp">
+
+                    <TextView
+                        style="@style/TextView.InputLabel"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/period_month" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/input_period_month"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:spinnerMode="dialog" />
                 </LinearLayout>
 
+            </LinearLayout>
                 <LinearLayout
                     android:id="@+id/dateCustomLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
+                    android:visibility="gone"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -123,10 +147,8 @@
                     </LinearLayout>
 
 
-                </LinearLayout>
             </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
 
 
@@ -137,31 +159,14 @@
         android:id="@+id/section_settlement"
         android:layout_margin="4dp"
         >
-        <TextView
-            style="@style/TextView.InputLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_filter"  />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:focusable="false"
-            android:visibility="visible"
-            app:contentPadding="4dp"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="202dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:orientation="horizontal">
+                android:orientation="vertical">
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_weight="1"
                 android:paddingBottom="8dp">
 
                 <TextView
@@ -170,19 +175,19 @@
                     android:layout_height="wrap_content"
                     android:text="@string/label_person" />
 
-                <TextView
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/filter_analytics_person"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    app:chipSpacingVertical="2dp"
+                    android:layout_height="wrap_content"/>
 
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_weight="1"
                 android:paddingBottom="8dp">
 
                 <TextView
@@ -190,19 +195,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_category" />
-
-                <TextView
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/filter_analytics_category"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    app:chipSpacingVertical="2dp"
+                    android:layout_height="wrap_content"/>
 
 
             </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
         <Button
-            android:id="@+id/button"
+            android:id="@+id/generateReportButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/button_label_generate" />

@@ -104,6 +104,17 @@ public class Preferences {
 
     public static String convertFromSimpleDate(Date date){
         try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            return dateFormat.format(date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static String convertFromSimpleDateTime(Date date){
+        try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             return dateFormat.format(date);
         } catch (Exception e) {

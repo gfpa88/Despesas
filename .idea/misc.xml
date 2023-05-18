@@ -24,7 +24,7 @@
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/add_spreadsheet.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/calendar_layout.xml" value="0.24791666666666667" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/content_main.xml" value="0.1" />
-        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_analytics.xml" value="0.3333333333333333" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_analytics.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_categorias.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_movimentos.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_pessoas.xml" value="0.1" />
@@ -32,6 +32,7 @@
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/help_item_options.xml" value="0.2318840579710145" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/line_divider.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/movimento_item.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/report_layout.xml" value="0.157548125633232" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/round_shape.xml" value="0.17300724637681159" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/share_spreadsheet.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/spreadsheet_item.xml" value="0.3333333333333333" />

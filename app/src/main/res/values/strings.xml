@@ -3,7 +3,7 @@
     <string name="sheet_tab_persons">Persons!A:A</string>
     <string name="sheet_tab_category">Categories!A:A</string>
     <string name="sheet_tab_expensive_insert">Transactions!A:G</string>
-    <string name="sheet_tab_expensive_load">Transactions!A:E</string>
+    <string name="sheet_tab_expensive_load">Transactions!A:G</string>
     <string name="sheet_tab_category_name">Categories</string>
     <string name="sheet_tab_entry_name">Transactions</string>
     <string name="sheet_tab_persons_name">Persons</string>
@@ -69,5 +69,9 @@
     <string name="label_final_date">Final Date</string>
     <string name="label_filter">Filter</string>
     <string name="button_label_generate">Generate</string>
+    <string name="period_complete">Complete</string>
+    <string name="period_year">Year</string>
+    <string name="period_interval">Interval</string>
+    <string name="period_month">Month</string>
 
 </resources>

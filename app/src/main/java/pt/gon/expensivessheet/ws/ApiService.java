@@ -48,6 +48,7 @@ public class ApiService {
     }
     @NonNull
     private Sheets getService(Context context) {
+
         return new Sheets.Builder(new NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
                 GoogleCrendentialSingleton.getInstance().getmGoogleAccountCredential())
@@ -179,9 +180,12 @@ public class ApiService {
             m.setValor(movimento.get(2).toString());
             m.setTipo(movimento.get(3).toString());
             m.setPessoa(movimento.get(4).toString());
+            m.setMes(movimento.get(5).toString());
+            m.setAno(movimento.get(6).toString());
 
             movimentoList.add(m);
         }
+        movimentoList.remove(0);
         return movimentoList;
     }
 }
