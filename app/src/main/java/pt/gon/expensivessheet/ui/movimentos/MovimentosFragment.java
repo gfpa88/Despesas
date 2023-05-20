@@ -421,21 +421,8 @@ public class MovimentosFragment extends Fragment {
                     pessoa.setSelection(adapterPessoas.getPosition(movimento.getPessoa()));
 
                     final EditText valor = addViewMovimento.findViewById(R.id.input_ss_value);
-                    try{
-                        Double val =  Double.parseDouble(movimento.getValor());
-                        valor.setText(val.toString());
-                    }catch (Exception e){
-                        try{
-                            Double val =  Double.parseDouble(movimento.getValor().replace(",","."));
-                            valor.setText(val.toString());
-                        }catch (Exception e1){
-                            try{
-                                Double val =  Double.parseDouble(movimento.getValor().replace(".",","));
-                                valor.setText(val.toString());
-                            }catch (Exception e2){
-                            }
-                        }
-                    }
+                    Double val = Utils.convertTransactionValue(movimento.getValor());
+                    valor.setText(val.toString());
 
                     final EditText descricao = addViewMovimento.findViewById(R.id.input_ss_descricao);
                     descricao.setText(movimento.getDescricao());
@@ -520,6 +507,7 @@ public class MovimentosFragment extends Fragment {
         }).start();
 
     }
+
 
     @NonNull
     private String getLangString(int string_id) {

@@ -40,6 +40,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -221,10 +223,9 @@ public class AnalyticsFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void generateReport(){
-        final ProgressDialog progress = new ProgressDialog(getActivity());
-        progress.setTitle(R.string.dialog_loading);
-        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
-        progress.show();
+        if(movimentos == null || movimentos.isEmpty()){
+            return;
+        }
         List<String> categories = getSelectedChips(binding.filterAnalyticsCategory);
         List<String> persons = getSelectedChips(binding.filterAnalyticsPerson);
 
@@ -290,9 +291,8 @@ public class AnalyticsFragment extends Fragment {
         divider.setBackgroundResource(R.drawable.line_divider);
         report.addView(divider);
 
-        View total = buildReportLine("Total", ""+filterTransactions.stream().mapToDouble(m -> Double.parseDouble(m.getValor())).sum(),false);
+        View total = buildReportLine("Total", ""+filterTransactions.stream().mapToDouble(m -> Utils.convertTransactionValue(m.getValor())).sum(),false);
         report.addView(total);
-        progress.dismiss();
 
 
 /*        List<IBarDataSet> barSetList = new ArrayList<>();
@@ -365,7 +365,7 @@ public class AnalyticsFragment extends Fragment {
         LinearLayout.LayoutParams paramsValue = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         paramsValue.weight = 1.0f;
         txValue.setLayoutParams(paramsValue);
-        txValue.setText(value);
+        txValue.setText(new BigDecimal(Utils.convertTransactionValue(value)).setScale(2, RoundingMode.HALF_UP)+"");
             txValue.setGravity(Gravity.END);
 
         if(!subItem) {
@@ -391,7 +391,7 @@ public class AnalyticsFragment extends Fragment {
         Map<String, ReportElement> pessoasMap = new HashMap<>();
         for (Movimento myObject : filterTransactions) {
             String key = myObject.getPessoa();
-            Double value = Double.parseDouble(myObject.getValor());
+            Double value = Utils.convertTransactionValue(myObject.getValor());
             if (pessoasMap.containsKey(key)) {
                 ReportElement element = pessoasMap.get(key);
                 Double sum = element.getValue() + value;
@@ -419,7 +419,7 @@ public class AnalyticsFragment extends Fragment {
         Map<String, ReportElement> categoriasMap = new HashMap<>();
         for (Movimento myObject : filterTransactions) {
             String key = myObject.getTipo();
-            Double value = Double.parseDouble(myObject.getValor());
+            Double value = Utils.convertTransactionValue(myObject.getValor());
             if (categoriasMap.containsKey(key)) {
                 ReportElement element = categoriasMap.get(key);
                 Double sum = element.getValue() + value;

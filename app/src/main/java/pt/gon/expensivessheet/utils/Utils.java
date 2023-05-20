@@ -25,4 +25,19 @@ public class Utils {
            return Locale.ENGLISH;
         }
     }
+    public static Double convertTransactionValue(String valor) {
+        try{
+            return Double.parseDouble(valor);
+        }catch (Exception e){
+            try{
+                return Double.parseDouble(valor.replace(",","."));
+            }catch (Exception e1){
+                try{
+                    return Double.parseDouble(valor.replace(".",","));
+                }catch (Exception e2){
+                }
+            }
+        }
+        return null;
+    }
 }
