@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/drawable-mdpi/line_divider.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/drawable-xxhdpi/round_shape_red.xml" value="0.1145" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/drawable/card_background.xml" value="0.165" />
@@ -20,11 +21,11 @@
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/account_item.xml" value="0.20208333333333334" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/activity_sheet.xml" value="0.1" />
-        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/add_movimento.xml" value="0.2977777777777778" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/add_movimento.xml" value="0.264026402640264" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/add_spreadsheet.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/calendar_layout.xml" value="0.24791666666666667" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/content_main.xml" value="0.1" />
-        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_analytics.xml" value="0.1" />
+        <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_analytics.xml" value="0.2222222222222222" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_categorias.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_movimentos.xml" value="0.1" />
         <entry key="..\:/Dados/Pessoal/Despesas/app/src/main/res/layout/fragment_pessoas.xml" value="0.1" />

@@ -73,5 +73,5 @@
     <string name="period_interval">Intervalo</string>
     <string name="period_complete">Completo</string>
     <string name="period_month">Mês</string>
-
+    <string name="label_expand">Expandir</string>
 </resources>

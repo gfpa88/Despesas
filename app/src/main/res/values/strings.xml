@@ -73,5 +73,6 @@
     <string name="period_year">Year</string>
     <string name="period_interval">Interval</string>
     <string name="period_month">Month</string>
+    <string name="label_expand">Expand</string>
 
 </resources>

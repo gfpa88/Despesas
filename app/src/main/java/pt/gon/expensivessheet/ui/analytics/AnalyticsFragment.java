@@ -3,8 +3,12 @@ package pt.gon.expensivessheet.ui.analytics;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +22,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
@@ -33,13 +49,13 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import pt.gon.expensivessheet.R;
 import pt.gon.expensivessheet.adapter.Preferences;
 import pt.gon.expensivessheet.databinding.FragmentAnalyticsBinding;
 import pt.gon.expensivessheet.ui.analytics.model.Report;
-import pt.gon.expensivessheet.ui.analytics.model.ReportChild;
 import pt.gon.expensivessheet.ui.analytics.model.ReportElement;
 import pt.gon.expensivessheet.utils.Utils;
 import pt.gon.expensivessheet.ws.ApiService;
@@ -56,6 +72,8 @@ public class AnalyticsFragment extends Fragment {
     private List<String> anos;
     private List<String> periodos;
     private List<String> meses;
+    private boolean reportExpandState;
+    private int reportTypeState;
 
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -177,6 +195,21 @@ public class AnalyticsFragment extends Fragment {
                     pessoas.forEach( p -> addChip(p,binding.filterAnalyticsPerson));
                     categorias.forEach( p -> addChip(p,binding.filterAnalyticsCategory));
 
+                    View expand =  binding.expandButton;
+                    expand.setOnClickListener(view -> {
+                        reportExpandState = !reportExpandState;
+                        generateReport();
+                    });
+
+                    binding.radioButtonPessoas.setOnClickListener(view -> {
+                        reportTypeState = 0;
+                        generateReport();
+                    });
+                    binding.radioButtonCategorias.setOnClickListener(view -> {
+                        reportTypeState = 1;
+                        generateReport();
+                    });
+                    generateReport();
 
                 });
             } catch (Exception e) {
@@ -188,6 +221,10 @@ public class AnalyticsFragment extends Fragment {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void generateReport(){
+        final ProgressDialog progress = new ProgressDialog(getActivity());
+        progress.setTitle(R.string.dialog_loading);
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
         List<String> categories = getSelectedChips(binding.filterAnalyticsCategory);
         List<String> persons = getSelectedChips(binding.filterAnalyticsPerson);
 
@@ -214,14 +251,142 @@ public class AnalyticsFragment extends Fragment {
                 break;
         }
 
-        Report report = new Report();
-        report.setMovimentos(filterTransactions);
+        LinearLayout report = binding.report;
+        report.removeAllViews();
 
-        Map<String, ReportElement> pessoasMap = generateReportByPerson(filterTransactions);
+        switch (reportTypeState){
+            case 0:
+                Map<String, ReportElement> pessoasMap = generateReportByPerson(filterTransactions);
+                for (Map.Entry<String, ReportElement> entry : pessoasMap.entrySet()) {
+                    String key = entry.getKey();
+                    ReportElement element = entry.getValue();
+                    //rootView
+                    View l = buildReportLine(key, element.getValue().toString(),false);
+                    report.addView(l);
+                    if(reportExpandState) {
+                        element.getChilds().forEach((s, aDouble) -> report.addView(buildReportLine(s, aDouble.toString(), true)));
+                    }
+                }
+                break;
+            case 1:
+                Map<String, ReportElement> categoriasMap = generateReportByCategory(filterTransactions);
+                for (Map.Entry<String, ReportElement> entry : categoriasMap.entrySet()) {
+                    String key = entry.getKey();
+                    ReportElement element = entry.getValue();
+                    //rootView
+                    View l = buildReportLine(key, element.getValue().toString(),false);
+                    report.addView(l);
+                    if(reportExpandState) {
+                        element.getChilds().forEach((s, aDouble) -> report.addView(buildReportLine(s, aDouble.toString(), true)));
+                    }
+                }
+                break;
+        }
+
+
+        View divider = new View(getContext());
+        LinearLayout.LayoutParams paramsDivider = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+        paramsDivider.weight = 1.0f;
+        divider.setBackgroundResource(R.drawable.line_divider);
+        report.addView(divider);
+
+        View total = buildReportLine("Total", ""+filterTransactions.stream().mapToDouble(m -> Double.parseDouble(m.getValor())).sum(),false);
+        report.addView(total);
+        progress.dismiss();
+
+
+/*        List<IBarDataSet> barSetList = new ArrayList<>();
+        float i = 0f;
+        for (Map.Entry<String, ReportElement> entry : pessoasMap.entrySet()) {
+            List<BarEntry> entries = new ArrayList<>();
+            String key = entry.getKey();
+            ReportElement element = entry.getValue();
+            entries.add(new BarEntry(i, element.getValue().floatValue()));
+
+            BarDataSet set = new BarDataSet(entries, key);
+            Random rnd = new Random();
+            int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+            set.setColor(R.color.colorPrimary);
+            set.setValueTextSize(17);
+            barSetList.add(set);
+            i++;
+        }
+
+        BarChart pessoasChart = binding.pessoasChart;
+        BarData data = new BarData(barSetList);
+      //  data.setBarWidth(0.9f); // set custom bar width
+
+        pessoasChart.setData(data);
+        //pessoasChart.getXAxis().setEnabled(false);
+        pessoasChart.getXAxis().setDrawLabels(true);
+        pessoasChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        pessoasChart.getXAxis().setDrawGridLines(false);
+        pessoasChart.getXAxis().setGranularity(1f); // only intervals of 1 day
+        pessoasChart.getXAxis().setLabelCount(pessoasMap.entrySet().size());
+        pessoasChart.setDescription(null);
+        pessoasChart.getLegend().setEnabled(false);
+        pessoasChart.getLegend().setWordWrapEnabled(true);
+       // pessoasChart.getLegend().setOrientation(Legend.LegendOrientation.VERTICAL);
+       // pessoasChart.getLegend().setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+
+        ValueFormatter xAxisFormatter = new DayAxisValueFormatter(pessoasChart, new ArrayList<>(pessoasMap.keySet()));
+        pessoasChart.getXAxis().setValueFormatter(xAxisFormatter);
+       // pessoasChart.setFitBars(true); // make the x-axis fit exactly all bars
+        pessoasChart.invalidate(); // refresh*/
 
 
     }
 
+    private View buildReportLine( String key, String value, boolean subItem) {
+        LinearLayout l = new LinearLayout(getContext());
+        final LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        // params.weight = 4;
+        if(!subItem) {
+            params.setMargins(40,20,20,10);
+        }else{
+            params.setMargins(100,5,20,5);
+        }
+        l.setLayoutParams(params);
+        l.setOrientation(LinearLayout.HORIZONTAL);
+        l.setClickable(true);
+
+        //EditText view
+        TextView name = new TextView(getContext());
+        LinearLayout.LayoutParams paramsName = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        name.setLayoutParams(paramsName);
+        if(!subItem) {
+            name.setTypeface(null, Typeface.BOLD);
+        }
+        name.setText(key);
+        l.addView(name);
+
+        TextView txValue = new TextView(getContext());
+        LinearLayout.LayoutParams paramsValue = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        paramsValue.weight = 1.0f;
+        txValue.setLayoutParams(paramsValue);
+        txValue.setText(value);
+            txValue.setGravity(Gravity.END);
+
+        if(!subItem) {
+            txValue.setTypeface(null, Typeface.BOLD);
+        }
+        l.addView(txValue);
+        return l;
+    }
+
+    public class DayAxisValueFormatter extends ValueFormatter {
+        private final BarLineChartBase<?> chart;
+        List<String> list;
+        public DayAxisValueFormatter(BarLineChartBase<?> chart, List<String> list) {
+            this.chart = chart;
+            this.list = list;
+        }
+        @Override
+        public String getFormattedValue(float value) {
+            return list.get((int)value);
+        }
+    }
     private Map<String, ReportElement> generateReportByPerson(List<Movimento> filterTransactions) {
         Map<String, ReportElement> pessoasMap = new HashMap<>();
         for (Movimento myObject : filterTransactions) {
@@ -231,11 +396,10 @@ public class AnalyticsFragment extends Fragment {
                 ReportElement element = pessoasMap.get(key);
                 Double sum = element.getValue() + value;
                 Map<String, Double> categoriasMap = element.getChilds();
-                if (categoriasMap.containsKey(key)) {
-                    Double sumCat = categoriasMap.get(key) + value;
-                    categoriasMap.put(key, sumCat);
+                if (categoriasMap.containsKey(myObject.getTipo())) {
+                    Double sumCat = categoriasMap.get(myObject.getTipo()) + value;
+                    categoriasMap.put(myObject.getTipo(), sumCat);
                 }else{
-                    categoriasMap = new HashMap<>();
                     categoriasMap.put(myObject.getTipo(), value);
                 }
 
@@ -250,6 +414,34 @@ public class AnalyticsFragment extends Fragment {
             }
         }
         return pessoasMap;
+    }
+    private Map<String, ReportElement> generateReportByCategory(List<Movimento> filterTransactions) {
+        Map<String, ReportElement> categoriasMap = new HashMap<>();
+        for (Movimento myObject : filterTransactions) {
+            String key = myObject.getTipo();
+            Double value = Double.parseDouble(myObject.getValor());
+            if (categoriasMap.containsKey(key)) {
+                ReportElement element = categoriasMap.get(key);
+                Double sum = element.getValue() + value;
+                Map<String, Double> pessoasMap = element.getChilds();
+                if (pessoasMap.containsKey(myObject.getPessoa())) {
+                    Double sumCat = pessoasMap.get(myObject.getPessoa()) + value;
+                    pessoasMap.put(myObject.getPessoa(), sumCat);
+                }else{
+                    pessoasMap.put(myObject.getPessoa(), value);
+                }
+
+                element.setValue(sum);
+            } else {
+                ReportElement element = new ReportElement();
+                element.setValue(value);
+                Map<String, Double> pessoasMap = new HashMap<>();
+                pessoasMap.put(myObject.getPessoa(), value);
+                element.setChilds(pessoasMap);
+                categoriasMap.put(key, element);
+            }
+        }
+        return categoriasMap;
     }
 
     private List<String> getSelectedChips(ChipGroup pChipGroup){
