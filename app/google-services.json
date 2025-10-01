@@ -1,0 +1,71 @@
+{
+  "project_info": {
+    "project_number": "373460637778",
+    "project_id": "expensivessheet",
+    "storage_bucket": "expensivessheet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:373460637778:android:974ae4a79e116bd72a678b",
+        "android_client_info": {
+          "package_name": "pt.gon.expensivessheet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "373460637778-1jh7ktp3h91r3631jqg9fe2sjdc3dis4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pt.gon.expensivessheet",
+            "certificate_hash": "b06749a4e6d124625d864ab4e1281f1a351d2404"
+          }
+        },
+        {
+          "client_id": "373460637778-675eg21a6mtg5307ksrkai5q9mbvv1rk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pt.gon.expensivessheet",
+            "certificate_hash": "acb1b13a31fa9dcd55ad6eeade761623659f11db"
+          }
+        },
+        {
+          "client_id": "373460637778-t8fkvn839l1mb0u0mpkig5g89bsj4c9a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pt.gon.expensivessheet",
+            "certificate_hash": "badac8dff138387e2080cadd56766d69c60eef35"
+          }
+        },
+        {
+          "client_id": "373460637778-u9lqdfpp9el3luvagqsdaj4khedc46gl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pt.gon.expensivessheet",
+            "certificate_hash": "53d7917295f0178cc9725a8cf677f043d4a79313"
+          }
+        },
+        {
+          "client_id": "373460637778-ab200008rq1dc10mdjlnfmp6q150l98t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDory89fZHkcRpuAtTlfLXNXN3aLkWBsRU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "373460637778-ab200008rq1dc10mdjlnfmp6q150l98t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
