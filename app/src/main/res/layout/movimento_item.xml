@@ -1,5 +1,6 @@
 <pt.gon.expensivessheet.layout.SwipeRevealLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_vertical"
@@ -36,9 +37,6 @@
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardElevation="5dp"
@@ -65,24 +63,29 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
+                        android:gravity="start"
                         android:layout_weight="1">
-                        <TextView
-                            android:id="@+id/value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+
+
+                        <ImageView
+                            android:id="@+id/avatar"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
                             android:layout_margin="1dp"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            tools:text="Valor"/>
+                            android:gravity="start"
+                            android:background="@drawable/round_shape_person"
+                            tools:srcCompat="@tools:sample/avatars" />
 
                         <TextView
-                            android:id="@+id/tipo"
+                            android:id="@+id/pessoa"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_margin="1dp"
                             android:textSize="16sp"
-                            android:textStyle="italic"
-                            tools:text="Tipo"/>
+                            android:layout_margin="1dp"
+                            android:gravity="start"
+                            tools:text="Pessoa"/>
+
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -92,13 +95,14 @@
                         android:gravity="end"
                         android:layout_weight="1">
                         <TextView
-                            android:id="@+id/pessoa"
+                            android:id="@+id/value"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="16sp"
                             android:layout_margin="1dp"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
                             android:gravity="end"
-                            tools:text="Pessoa"/>
+                            tools:text="Valor"/>
                         <TextView
                             android:id="@+id/date"
                             android:layout_width="match_parent"
@@ -109,13 +113,28 @@
                             tools:text="Data"/>
                     </LinearLayout>
                 </LinearLayout>
-                <TextView
-                    android:id="@+id/descricao"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="1dp"
-                    android:textSize="13sp"
-                    tools:text="Descricao"/>
+                    android:orientation="horizontal"
+                    android:gravity="start"
+                    android:layout_weight="1">
+                    <TextView
+                        android:id="@+id/tipo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textStyle="italic"
+                        android:gravity="start"
+                        tools:text="Tipo"/>
+                    <TextView
+                        android:id="@+id/descricao"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:gravity="end"
+                        tools:text="Descricao"/>
+                </LinearLayout>
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
